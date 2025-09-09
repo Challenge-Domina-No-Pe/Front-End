@@ -1,6 +1,11 @@
 import logo from "../assets/Dominalogo.png";
+import { useNavigate } from "react-router-dom";
 
 export default function CriarConta() {
+  const navigate = useNavigate();
+  const goHome = () => {
+    navigate('/');
+  };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       {/* Logo */}
@@ -73,6 +78,7 @@ export default function CriarConta() {
 
           <button
             type="submit"
+            onClick={goHome}
             className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition"
           >
             Criar
