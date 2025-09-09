@@ -1,5 +1,5 @@
 import Sidebar from "../../components/Sidebar";
-import Home from "../Home";
+import { Outlet } from "react-router-dom"
 
 
 export default function MainLayout() {
@@ -7,7 +7,7 @@ export default function MainLayout() {
     <div className="flex">
         <Sidebar/>
       <div className="flex-1 bg-gray-100 min-h-screen p-6">
-                <Home/>
+                <Outlet/>
       </div>
     </div>
   );
