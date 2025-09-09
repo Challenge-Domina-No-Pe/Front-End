@@ -16,10 +16,10 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-[#2D065A] text-white h-screen p-5 flex flex-col justify-between">
+    <aside className="w-64 bg-[#8f5fbe] text-white h-screen p-5 flex flex-col justify-between">
       <div>
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold">Passa a Bola</h1>
+          <h1 className="text-3xl font-bold">Domina no pé</h1>
           {/* {user && <p className="text-sm text-purple-300 mt-2">Bem-vindo, {user.name}!</p>} */}
         </div>
         <nav className="flex flex-col gap-4 bg-purple">
