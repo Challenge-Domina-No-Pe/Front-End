@@ -1,6 +1,7 @@
 import Sidebar from "../../components/Sidebar";
 import Home from "../Home";
 
+
 export default function MainLayout() {
   return (
     <div className="flex">

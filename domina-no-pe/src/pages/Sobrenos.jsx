@@ -1,3 +1,10 @@
-export default function SobreNos() { 
-    return <h1 className="text-3xl font-bold">Página Inicial da Copa PAB</h1>; 
+import Tabs from "../components/Tabs";
+
+export default function SobreNos() {
+  return (
+    <div className="p-6 flex-1 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Sobre nós</h1>
+      <Tabs />
+    </div>
+  );
 }

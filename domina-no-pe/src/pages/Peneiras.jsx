@@ -1,3 +1,10 @@
-export default function Peneiras() { 
-    return <h1 className="text-3xl font-bold">Página Inicial da Copa PAB</h1>; 
+import Tabs from "../components/Tabs";
+
+export default function Peneiras() {
+  return (
+    <div className="p-6 flex-1 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Peneiras</h1>
+      <Tabs />
+    </div>
+  );
 }
