@@ -54,7 +54,7 @@ export default function Peneiras() {
         {/* Imagens */}
         <div className="flex flex-col md:flex-row gap-6 mt-10">
           <img
-            src={Peneira1} // substitua pelas suas imagens
+            src={Peneira1} 
             alt="Jogador em peneira"
             className="w-64 h-40 object-cover rounded-lg shadow-md"
           />
