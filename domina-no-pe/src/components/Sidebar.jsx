@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import logo from "../assets/Dominalogo.png";
 // import { useAuth } from "../contexts/AuthContexts";
 
 export default function Sidebar() {
@@ -16,12 +17,14 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-[#8f5fbe] text-white h-screen p-5 flex flex-col justify-between">
+    <aside className="w-64 bg-[#7c3fb9] text-white min-h-screen p-5 flex flex-col justify-between ">
       <div>
+        <NavLink to="/" style={({ isActive }) => isActive ? activeLinkStyle : undefined}>
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold">Domina no pé</h1>
+          <h1 className="text-3xl font-bold"><img src={logo} alt="" className="w-20 h-20 object-cover rounded-lg mx-auto"/></h1>
           {/* {user && <p className="text-sm text-purple-300 mt-2">Bem-vindo, {user.name}!</p>} */}
         </div>
+        </NavLink>
         <nav className="flex flex-col gap-4 bg-purple">
           <NavLink to="/" style={({ isActive }) => isActive ? activeLinkStyle : undefined} className="p-3 rounded-md hover:bg-purple-800 transition-colors">Home</NavLink>
           <NavLink to="/copa-pab" style={({ isActive }) => isActive ? activeLinkStyle : undefined} className="p-3 rounded-md hover:bg-purple-800 transition-colors">Copa PAB</NavLink>
