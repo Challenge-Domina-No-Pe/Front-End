@@ -8,6 +8,7 @@ import CopaPabLayout from "../pages/layout/CopaPabLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import CriarConta from "../pages/CriarConta";
+import Noticias from "../pages/Noticias";
 import Peneiras from "../pages/Peneiras";
 import Escolinhas from "../pages/Escolinhas";
 import SobreNos from "../pages/SobreNos";
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+       {
+        path: "noticias",
+        element: <Noticias />,
       },
       {
         path: "peneiras",

@@ -120,6 +120,14 @@ export default function Sidebar() {
           </div>
 
           <NavLink
+            to="/noticias"
+            style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
+            className="p-3 rounded-md hover:bg-purple-800 transition-colors"
+          >
+            Noticias
+          </NavLink>
+
+          <NavLink
             to="/peneiras"
             style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
             className="p-3 rounded-md hover:bg-purple-800 transition-colors"
