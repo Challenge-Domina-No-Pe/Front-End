@@ -1,4 +1,10 @@
+import { useNavigate } from "react-router-dom";
+
 export default function PageNotFound() {
+  const navigate = useNavigate();
+  const goHome = () => {
+    navigate('/');
+  };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="text-center">
@@ -7,10 +13,13 @@ export default function PageNotFound() {
         <p className="text-gray-700 mb-4">
           Desculpe, a página que você está procurando não existe.
         </p>
-        <a href="" className="text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          Voltar para Home
-        </a>
+        <button
+            type="button"
+            onClick={goHome}
+            className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition"
+          >
+            Voltar a home
+          </button>
       </div>
     </div>
   );
