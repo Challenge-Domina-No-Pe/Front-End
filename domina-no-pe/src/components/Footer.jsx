@@ -2,7 +2,7 @@ import logo from "../assets/Dominalogo.png";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gray-100 py-6 mt-10 border-t border-gray-300">
+    <footer className="w-full h-1 bg-gray-100 py-6 mt-10 border-t border-gray-300">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between text-gray-600 text-sm">
         
         {/* Logo ou nome do projeto */}
