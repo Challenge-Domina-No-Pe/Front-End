@@ -33,9 +33,18 @@ const HomeIcon = () => (
   </svg>
 );
 
-const TrophyIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0"/>
+const TrophyIcon = ({ className = "w-6 h-6 flex-shrink-0" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"      
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"          
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}    
+  >
+    <path d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0"/>
   </svg>
 );
 
@@ -133,17 +142,10 @@ export default function Sidebar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMobileOpen]);
 
-  return (
-    <>
-      {/* Mobile Header */}
-      <div>
-        <h1 className="font-bold text-lg"></h1>
-        {/*<button onClick={() => setIsMobileOpen(!isMobileOpen)}>
-          {isMobileOpen ? <XIcon /> : <MenuIcon />}
-        </button>*/}
-      </div>
-
-      {isMobileOpen && <div className="fixed inset-0  bg-opacity-40 z-30 md:hidden"></div>}
+return ( 
+<> 
+{/* Mobile Header */} 
+<div className="md:hidden flex items-center justify-between p-3 bg-[#7c3fb9] text-white"> {/* <h1 className="font-bold text-lg">Domina no Pé</h1> <button onClick={() => setIsMobileOpen(!isMobileOpen)}> {isMobileOpen ? <XIcon /> : <MenuIcon />} </button> */} </div> {isMobileOpen && <div className="fixed inset-0 bg-opacity-40 z-30 md:hidden"></div>}
 
       {/* Sidebar */}
       <aside
@@ -151,8 +153,8 @@ export default function Sidebar() {
         onClick={() => window.innerWidth < 768 && setIsMobileOpen(true)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`flex-shrink-0 bg-[#7c3fb9] text-white flex flex-col z-40 transition-all duration-300 ${isMobileOpen ? "absolute inset-0 w-64" : isPinned ? "w-64" : "w-16"}`}
-      >
+className={`flex-shrink-0 bg-[#7c3fb9] text-white flex flex-col min-h-full z-40 transition-all duration-300 
+    ${isMobileOpen ? "absolute inset-0 w-64 top-0" : isPinned ? "w-full" : "w-16" }`}      >
 
         {/* Desktop Header */}
         <div className="hidden md:flex items-center justify-between p-3">
@@ -182,7 +184,7 @@ export default function Sidebar() {
                   style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
                   className="flex items-center gap-3 p-3 rounded-md hover:bg-purple-800 transition-colors flex-1"
                 >
-                  <TrophyIcon />
+                  <TrophyIcon className={`${isPinned || isMobileOpen ? "w-6 h-6" : "w-4 h-4"} transition-all duration-300`} />
                   {(isPinned || isMobileOpen) && <span>Copa PAB</span>}
                 </NavLink>
                 {(isPinned || isMobileOpen) && (
@@ -228,11 +230,13 @@ export default function Sidebar() {
               {(isPinned || isMobileOpen) && <span>Contato</span>}
             </NavLink>
 
-            {/* Logout */}
-            <button onClick={handleLogout} className="flex items-center gap-3 p-3 mt-4 rounded-md bg-red-700 transition-colors">
-              <LogoutIcon />
-              {(isPinned || isMobileOpen) && <span>Sair</span>}
-            </button>
+             <button
+      onClick={handleLogout}
+      className="flex items-center gap-3 p-3 mt-auto rounded-md bg-red-700 transition-colors"
+    >
+      <LogoutIcon />
+      {(isPinned || isMobileOpen) && <span>Sair</span>}
+    </button>
           </nav>
         </div>
       </aside>
