@@ -8,21 +8,21 @@ export default function Escolinhas() {
   return (
     <div className="flex flex-col min-h-screen w-full">
       {/* Conteúdo principal */}
-      <main className="flex-grow flex flex-col items-center justify-start p-6">
+      <main className="flex-grow flex flex-col items-center justify-start p-4 sm:p-6 w-full">
         {/* Logo e título */}
         <div className="flex flex-col items-center gap-4 mt-4">
           <img
             src={logo}
             alt="Domina no pé"
-            className="w-40"
+            className="w-32 sm:w-40"
           />
-          <h2 className="text-2xl font-semibold text-gray-800 text-center">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 text-center">
             Que tal achar uma escolinha para sua Filha?
           </h2>
         </div>
 
         {/* Input de localização */}
-        <div className="mt-8 w-full max-w-xl">
+        <div className="mt-8 w-full px-4 sm:px-0 max-w-xl">
           <label
             htmlFor="location"
             className="block text-sm text-gray-600 mb-2"
@@ -50,45 +50,45 @@ export default function Escolinhas() {
         </div>
 
         {/* Tabela de escolinhas */}
-        <div className="mt-10 w-full max-w-4xl">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+        <div className="mt-10 w-full px-4 sm:px-0 max-w-4xl">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-4 text-center">
             Algumas escolinhas famosas:
           </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300 rounded-lg shadow-md bg-white">
+          <div className="overflow-x-auto w-full">
+            <table className="min-w-full border border-gray-300 rounded-lg shadow-md bg-white text-sm sm:text-base">
               <thead>
-                <tr className="bg-purple-700 text-white">
-                  <th className="px-6 py-3 text-left">Instituição</th>
-                  <th className="px-6 py-3 text-left">Endereço</th>
-                  <th className="px-6 py-3 text-left">Saiba mais</th>
+                <tr className="bg-purple-700 text-white text-sm sm:text-base">
+                  <th className="px-4 sm:px-6 py-2 sm:py-3 text-left">Instituição</th>
+                  <th className="px-4 sm:px-6 py-2 sm:py-3 text-left">Endereço</th>
+                  <th className="px-4 sm:px-6 py-2 sm:py-3 text-left">Saiba mais</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="px-6 py-3">JogaMiga</td>
-                  <td className="px-6 py-3">Diversos locais em vários estados</td>
-                  <td className="px-6 py-3 text-purple-600 font-medium">
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">JogaMiga</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">Diversos locais em vários estados</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3 text-purple-600 font-medium">
                     <a href="https://jogamiga.com.br/querojogar/" target="_blank" rel="noreferrer">JogaMiga</a>
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="px-6 py-3">Meninas em Campo</td>
-                  <td className="px-6 py-3">Av. Corifeu de Azevedo Marques, 3200 - Butantã</td>
-                  <td className="px-6 py-3 text-purple-600 font-medium">
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">Meninas em Campo</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">Av. Corifeu de Azevedo Marques, 3200 - Butantã</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3 text-purple-600 font-medium">
                     <a href="https://www.meninasemcampo.org.br/" target="_blank" rel="noreferrer">Meninas em Campo</a>
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="px-6 py-3">Donas da Bola</td>
-                  <td className="px-6 py-3">R. Tijuco Preto, 1023 - Tatuapé</td>
-                  <td className="px-6 py-3 text-purple-600 font-medium">
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">Donas da Bola</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">R. Tijuco Preto, 1023 - Tatuapé</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3 text-purple-600 font-medium">
                     <a href="https://wellhub.com/pt-br/search/partners/donas-da-bola-f-c-tatuape-tatuape-sao-paulo/" target="_blank" rel="noreferrer">Donas da Bola</a>
                   </td>
                 </tr>
                 <tr>
-                  <td className="px-6 py-3">PSG Academy</td>
-                  <td className="px-6 py-3">Diversas unidades em vários estados</td>
-                  <td className="px-6 py-3 text-purple-600 font-medium">
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">PSG Academy</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3">Diversas unidades em vários estados</td>
+                  <td className="px-4 sm:px-6 py-2 sm:py-3 text-purple-600 font-medium">
                     <a href="https://psgacademy.com.br/" target="_blank" rel="noreferrer">PSG Academy</a>
                   </td>
                 </tr>
