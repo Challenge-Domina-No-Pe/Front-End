@@ -50,6 +50,16 @@ export default function Login() {
             />
           </div>
 
+          {/* Esqueceu a senha */}
+    <div className="text-right mt-1">
+      <a
+        href="/recuperar-senha"
+        className="text-sm text-purple-600 hover:underline"
+      >
+        Esqueceu a senha?
+      </a>
+    </div>
+
           <button
             type="button"
             onClick={goHome}

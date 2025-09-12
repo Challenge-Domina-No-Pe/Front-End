@@ -7,6 +7,7 @@ import CopaPabLayout from "../pages/layout/CopaPabLayout";
 
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import RecuperarSenha from "../pages/RecuperarSenha"
 import CriarConta from "../pages/CriarConta";
 import Noticias from "../pages/Noticias";
 import Peneiras from "../pages/Peneiras";
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
   {
     path: "/criar-conta",
     element: <CriarConta />,
+  },
+  {
+    path: "/recuperar-senha",
+    element: <RecuperarSenha />,
   },
   {
     path: "/",
