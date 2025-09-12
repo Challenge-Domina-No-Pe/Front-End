@@ -143,7 +143,7 @@ export default function Sidebar() {
         </button>*/}
       </div>
 
-      {isMobileOpen && <div className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"></div>}
+      {isMobileOpen && <div className="fixed inset-0  bg-opacity-40 z-30 md:hidden"></div>}
 
       {/* Sidebar */}
       <aside

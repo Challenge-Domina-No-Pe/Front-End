@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PeneirasCard from "../components/PeneirasCard";
 import PeneiraModal from '../components/PeneiraModal';
+import Footer from "../components/Footer";
 
 const Peneiras = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,6 +92,8 @@ const Peneiras = () => {
         onClose={handleCloseModal}
         peneira={selectedPeneira}
       />
+      <br />
+      <Footer/>
     </div>
   );
 };

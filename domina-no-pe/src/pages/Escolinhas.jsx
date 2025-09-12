@@ -13,7 +13,7 @@ export default function Escolinhas() {
         <div className="flex flex-col items-center gap-4 mt-4">
           <img
             src={logo}
-            alt="Passa a Bola"
+            alt="Domina no pé"
             className="w-40"
           />
           <h2 className="text-2xl font-semibold text-gray-800 text-center">

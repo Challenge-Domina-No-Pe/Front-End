@@ -1,5 +1,6 @@
 import NewsCard from "../components/NewsCard";
 import Footer from "../components/Footer";
+import logo from "../assets/Dominalogo.png";
 
 const Home = () => {
   const newsItems = [
@@ -28,12 +29,16 @@ const Home = () => {
 
   return (
     <div className="p-8">
+      <div className="flex items-center gap-3 mb-4">
+      <img src={logo} alt="Logo" className="w-15  object-contain" />
       <h1 className="text-4xl font-bold mb-4">Bem-vindo ao Domina no Pé</h1>
+      </div>
+
       <p className="text-lg text-gray-700 mb-8">
         A sua plataforma de conteúdo sobre futebol feminino. Fique por dentro das últimas notícias,
         eventos e peneiras do esporte.
       </p>
-
+      
       <h2 className="text-3xl font-semibold mb-6 mt-12">Últimas Notícias</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {newsItems.map(item => (
