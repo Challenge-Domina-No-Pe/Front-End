@@ -181,7 +181,7 @@ export default function TimesCompeticao1() {
   useEffect(() => save("c1-rosters", rosters), [rosters]);
   useEffect(() => save("c1-logos", logos), [logos]);
 
-  /* ---------- Cadastro de time (sem permissão) ---------- */
+  /* ---------- Cadastro de time (Opção 2: transferir/apagar elenco) ---------- */
   const [form, setForm] = useState({
     name: "",
     logo: "",
@@ -192,29 +192,59 @@ export default function TimesCompeticao1() {
     setError("");
     const g = form.group;
     const names = [...teams[g]];
-    // 1) tentar substituir placeholder "Time X"
+
+    // 1) tenta substituir placeholder “Time X” ou “—”
     let idx = names.findIndex((n) => /^time\s*\d+$/i.test(n) || n === "—");
-    // 2) se nenhum placeholder, só deixa se o grupo AINDA não começou (todos placares vazios)
-    const groupMatches = matches[g];
-    const groupStarted = groupMatches.some((m) => m.ga !== "" || m.gb !== "");
+
+    // 2) se não existir placeholder, pergunta se quer substituir o primeiro
     if (idx === -1) {
-      if (groupStarted) {
-        setError("Este grupo já começou. Não é possível cadastrar automaticamente.");
-        return;
-      }
-      idx = 0; // ainda não começou: substitui o primeiro
+      const ok = window.confirm(
+        `Não há vaga “livre” no Grupo ${g}.\n` +
+        `Deseja substituir o time na posição 1 da lista (atual: "${names[0]}")?`
+      );
+      if (!ok) return;
+      idx = 0;
     }
 
     const newNames = [...teams[g]];
+    const oldName = newNames[idx];
     newNames[idx] = form.name;
 
-    const newTeams = { ...teams, [g]: newNames };
+    // atualiza logos do novo time
     const newLogos = { ...logos, [form.name]: form.logo };
 
+    // trata elenco antigo (se diferente do nome novo)
+    let nextRosters = { ...rosters };
+    if (oldName && oldName !== form.name && nextRosters[oldName]?.length) {
+      const transfer = window.confirm(
+        `Encontramos jogadoras cadastradas em "${oldName}".\n` +
+        `OK = transferir elenco para "${form.name}"\n` +
+        `Cancelar = apagar elenco antigo`
+      );
+      if (transfer) {
+        nextRosters[form.name] = nextRosters[oldName];
+        delete nextRosters[oldName];
+      } else {
+        delete nextRosters[oldName];
+        nextRosters[form.name] = nextRosters[form.name] || [];
+      }
+    } else {
+      // garante array para o novo
+      nextRosters[form.name] = nextRosters[form.name] || [];
+    }
+
+    // aplica estados
+    const newTeams = { ...teams, [g]: newNames };
     setTeams(newTeams);
     setLogos(newLogos);
-    setRosters((prev) => ({ ...prev, [form.name]: prev[form.name] || [] }));
+    setRosters(nextRosters);
 
+    // persiste imediatamente (além do useEffect)
+    save("c1-teams", newTeams);
+    save("c1-logos", newLogos);
+    save("c1-rosters", nextRosters);
+
+    // limpa form (mantém grupo)
     setForm({ name: "", logo: "", group: form.group });
   };
 
@@ -240,7 +270,15 @@ export default function TimesCompeticao1() {
     setRosters((r) => ({
       ...r,
       [key]: (r[key] || []).map((pl) =>
-        pl.id === pid ? { ...pl, [field]: field === "gols" || field === "assistencias" ? Number(value || 0) : value } : pl
+        pl.id === pid
+          ? {
+              ...pl,
+              [field]:
+                field === "gols" || field === "assistencias"
+                  ? Number(value || 0)
+                  : value,
+            }
+          : pl
       ),
     }));
   };
@@ -413,7 +451,7 @@ export default function TimesCompeticao1() {
               <BigStat label="Jogos" value={sel.stats.v + sel.stats.e + sel.stats.d} />
             </div>
 
-            {/* elenco */}
+            {/* elenco – “cartinhas” */}
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold">Elenco</h3>
               <button
@@ -448,7 +486,9 @@ export default function TimesCompeticao1() {
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(e) => uploadPlayerPhoto(p.id, e.target.files?.[0])}
+                          onChange={(e) =>
+                            uploadPlayerPhoto(p.id, e.target.files?.[0])
+                          }
                         />
                       </label>
                     </div>
@@ -460,14 +500,18 @@ export default function TimesCompeticao1() {
                           <input
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.nome}
-                            onChange={(e) => updatePlayer(p.id, "nome", e.target.value)}
+                            onChange={(e) =>
+                              updatePlayer(p.id, "nome", e.target.value)
+                            }
                           />
                         </Field>
                         <Field label="Número">
                           <input
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.numero}
-                            onChange={(e) => updatePlayer(p.id, "numero", e.target.value)}
+                            onChange={(e) =>
+                              updatePlayer(p.id, "numero", e.target.value)
+                            }
                           />
                         </Field>
                       </div>
@@ -477,25 +521,31 @@ export default function TimesCompeticao1() {
                           <input
                             className="rounded-lg border px-2 py-1 flex-1"
                             value={p.posicao}
-                            onChange={(e) => updatePlayer(p.id, "posicao", e.target.value)}
+                            onChange={(e) =>
+                              updatePlayer(p.id, "posicao", e.target.value)
+                            }
                             placeholder="Ex.: MEI"
                           />
                         </div>
                         <div className="mt-2 flex flex-wrap gap-2">
-                          {["GOL", "ZAG", "LAT", "VOL", "MEI", "PON", "ATA"].map((pos) => (
-                            <button
-                              key={pos}
-                              onClick={() => updatePlayer(p.id, "posicao", pos)}
-                              className={`px-2 py-1 rounded-md text-xs font-semibold border ${
-                                p.posicao === pos
-                                  ? "bg-black text-white border-black"
-                                  : "bg-white text-black border-black hover:bg-black/10"
-                              }`}
-                              type="button"
-                            >
-                              {pos}
-                            </button>
-                          ))}
+                          {["GOL", "ZAG", "LAT", "VOL", "MEI", "PON", "ATA"].map(
+                            (pos) => (
+                              <button
+                                key={pos}
+                                onClick={() =>
+                                  updatePlayer(p.id, "posicao", pos)
+                                }
+                                className={`px-2 py-1 rounded-md text-xs font-semibold border ${
+                                  p.posicao === pos
+                                    ? "bg-black text-white border-black"
+                                    : "bg-white text-black border-black hover:bg-black/10"
+                                }`}
+                                type="button"
+                              >
+                                {pos}
+                              </button>
+                            )
+                          )}
                         </div>
                       </Field>
 
@@ -505,7 +555,9 @@ export default function TimesCompeticao1() {
                             type="number"
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.gols ?? 0}
-                            onChange={(e) => updatePlayer(p.id, "gols", e.target.value)}
+                            onChange={(e) =>
+                              updatePlayer(p.id, "gols", e.target.value)
+                            }
                           />
                         </Field>
                         <Field label="Assistências">
@@ -513,7 +565,9 @@ export default function TimesCompeticao1() {
                             type="number"
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.assistencias ?? 0}
-                            onChange={(e) => updatePlayer(p.id, "assistencias", e.target.value)}
+                            onChange={(e) =>
+                              updatePlayer(p.id, "assistencias", e.target.value)
+                            }
                           />
                         </Field>
                       </div>
@@ -522,7 +576,9 @@ export default function TimesCompeticao1() {
                         <input
                           className="w-full rounded-lg border px-2 py-1"
                           value={p.foto}
-                          onChange={(e) => updatePlayer(p.id, "foto", e.target.value)}
+                          onChange={(e) =>
+                            updatePlayer(p.id, "foto", e.target.value)
+                          }
                           placeholder="https://… (opcional se fez upload)"
                         />
                       </Field>
@@ -531,8 +587,10 @@ export default function TimesCompeticao1() {
                         <textarea
                           className="w-full rounded-lg border px-2 py-1"
                           rows={2}
-                          value={p.bio}
-                          onChange={(e) => updatePlayer(p.id, "bio", e.target.value)}
+                          value={p.bio || ""}
+                          onChange={(e) =>
+                            updatePlayer(p.id, "bio", e.target.value)
+                          }
                         />
                       </Field>
 
