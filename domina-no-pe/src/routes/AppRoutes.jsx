@@ -27,6 +27,12 @@ import TimesCompeticao1 from "../pages/CopaPAB/Competicao1/Times";
 import EstatisticasCompeticao1 from "../pages/CopaPAB/Competicao1/Estatisticas";
 import FotosCompeticao1 from "../pages/CopaPAB/Competicao1/Fotos";
 
+// Competição 2
+import TabelaCompeticao2 from "../pages/CopaPAB/Competicao2/Tabela";
+import TimesCompeticao2 from "../pages/CopaPAB/Competicao2/Times";
+import EstatisticasCompeticao2 from "../pages/CopaPAB/Competicao2/Estatisticas";
+import FotosCompeticao2 from "../pages/CopaPAB/Competicao2/Fotos";
+
 import PageNotFound from "../pages/PageNotFound";
 
 export const router = createBrowserRouter([
@@ -62,7 +68,7 @@ export const router = createBrowserRouter([
           {
             path: "competicao1",
             children: [
-              // ✅ Alias para links antigos: /copa-pab/competicao1/tabela/grupos
+              // Alias para links antigos: /copa-pab/competicao1/tabela/grupos
               { path: "tabela/grupos", element: <Navigate to="../tabela" replace /> },
 
               // Tabela sem fase na URL
@@ -71,6 +77,22 @@ export const router = createBrowserRouter([
               { path: "times", element: <TimesCompeticao1 /> },
               { path: "estatisticas", element: <EstatisticasCompeticao1 /> },
               { path: "fotos", element: <FotosCompeticao1 /> },
+            ],
+          },
+
+          // Competição 2
+          {
+            path: "competicao2",
+            children: [
+              // Alias semelhante para manter compatibilidade
+              { path: "tabela/grupos", element: <Navigate to="../tabela" replace /> },
+
+              // Tabela sem fase na URL
+              { path: "tabela", element: <TabelaCompeticao2 /> },
+
+              { path: "times", element: <TimesCompeticao2 /> },
+              { path: "estatisticas", element: <EstatisticasCompeticao2 /> },
+              { path: "fotos", element: <FotosCompeticao2 /> },
             ],
           },
         ],
