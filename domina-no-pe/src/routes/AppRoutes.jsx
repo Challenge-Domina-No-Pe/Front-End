@@ -33,6 +33,12 @@ import TimesCompeticao2 from "../pages/CopaPAB/Competicao2/Times";
 import EstatisticasCompeticao2 from "../pages/CopaPAB/Competicao2/Estatisticas";
 import FotosCompeticao2 from "../pages/CopaPAB/Competicao2/Fotos";
 
+// Competição 3
+import TabelaCompeticao3 from "../pages/CopaPAB/Competicao3/Tabela";
+import TimesCompeticao3 from "../pages/CopaPAB/Competicao3/Times";
+import EstatisticasCompeticao3 from "../pages/CopaPAB/Competicao3/Estatisticas";
+import FotosCompeticao3 from "../pages/CopaPAB/Competicao3/Fotos";
+
 import PageNotFound from "../pages/PageNotFound";
 
 export const router = createBrowserRouter([
@@ -70,10 +76,7 @@ export const router = createBrowserRouter([
             children: [
               // Alias para links antigos: /copa-pab/competicao1/tabela/grupos
               { path: "tabela/grupos", element: <Navigate to="../tabela" replace /> },
-
-              // Tabela sem fase na URL
               { path: "tabela", element: <TabelaCompeticao1 /> },
-
               { path: "times", element: <TimesCompeticao1 /> },
               { path: "estatisticas", element: <EstatisticasCompeticao1 /> },
               { path: "fotos", element: <FotosCompeticao1 /> },
@@ -84,15 +87,23 @@ export const router = createBrowserRouter([
           {
             path: "competicao2",
             children: [
-              // Alias semelhante para manter compatibilidade
               { path: "tabela/grupos", element: <Navigate to="../tabela" replace /> },
-
-              // Tabela sem fase na URL
               { path: "tabela", element: <TabelaCompeticao2 /> },
-
               { path: "times", element: <TimesCompeticao2 /> },
               { path: "estatisticas", element: <EstatisticasCompeticao2 /> },
               { path: "fotos", element: <FotosCompeticao2 /> },
+            ],
+          },
+
+          // Competição 3
+          {
+            path: "competicao3",
+            children: [
+              { path: "tabela/grupos", element: <Navigate to="../tabela" replace /> },
+              { path: "tabela", element: <TabelaCompeticao3 /> },
+              { path: "times", element: <TimesCompeticao3 /> },
+              { path: "estatisticas", element: <EstatisticasCompeticao3 /> },
+              { path: "fotos", element: <FotosCompeticao3 /> },
             ],
           },
         ],
