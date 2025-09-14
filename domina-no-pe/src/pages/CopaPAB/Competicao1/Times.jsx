@@ -181,7 +181,7 @@ export default function TimesCompeticao1() {
   useEffect(() => save("c1-rosters", rosters), [rosters]);
   useEffect(() => save("c1-logos", logos), [logos]);
 
-  /* ---------- Cadastro de time (Opção 2: transferir/apagar elenco) ---------- */
+  /* ---------- Cadastro de time ---------- */
   const [form, setForm] = useState({
     name: "",
     logo: "",
@@ -192,63 +192,175 @@ export default function TimesCompeticao1() {
     setError("");
     const g = form.group;
     const names = [...teams[g]];
-
-    // 1) tenta substituir placeholder “Time X” ou “—”
+    // 1) tentar substituir placeholder "Time X" ou "—"
     let idx = names.findIndex((n) => /^time\s*\d+$/i.test(n) || n === "—");
-
-    // 2) se não existir placeholder, pergunta se quer substituir o primeiro
+    // 2) se nenhum placeholder, só deixa se o grupo AINDA não começou (todos placares vazios)
+    const groupMatches = matches[g];
+    const groupStarted = groupMatches.some((m) => m.ga !== "" || m.gb !== "");
     if (idx === -1) {
-      const ok = window.confirm(
-        `Não há vaga “livre” no Grupo ${g}.\n` +
-        `Deseja substituir o time na posição 1 da lista (atual: "${names[0]}")?`
-      );
-      if (!ok) return;
-      idx = 0;
+      if (groupStarted) {
+        setError("Este grupo já começou. Não é possível cadastrar automaticamente.");
+        return;
+      }
+      idx = 0; // ainda não começou: substitui o primeiro
     }
 
     const newNames = [...teams[g]];
-    const oldName = newNames[idx];
     newNames[idx] = form.name;
 
-    // atualiza logos do novo time
+    const newTeams = { ...teams, [g]: newNames };
     const newLogos = { ...logos, [form.name]: form.logo };
 
-    // trata elenco antigo (se diferente do nome novo)
-    let nextRosters = { ...rosters };
-    if (oldName && oldName !== form.name && nextRosters[oldName]?.length) {
-      const transfer = window.confirm(
-        `Encontramos jogadoras cadastradas em "${oldName}".\n` +
-        `OK = transferir elenco para "${form.name}"\n` +
-        `Cancelar = apagar elenco antigo`
-      );
-      if (transfer) {
-        nextRosters[form.name] = nextRosters[oldName];
-        delete nextRosters[oldName];
-      } else {
-        delete nextRosters[oldName];
-        nextRosters[form.name] = nextRosters[form.name] || [];
-      }
-    } else {
-      // garante array para o novo
-      nextRosters[form.name] = nextRosters[form.name] || [];
-    }
-
-    // aplica estados
-    const newTeams = { ...teams, [g]: newNames };
     setTeams(newTeams);
     setLogos(newLogos);
-    setRosters(nextRosters);
+    setRosters((prev) => ({ ...prev, [form.name]: prev[form.name] || [] }));
 
-    // persiste imediatamente (além do useEffect)
-    save("c1-teams", newTeams);
-    save("c1-logos", newLogos);
-    save("c1-rosters", nextRosters);
-
-    // limpa form (mantém grupo)
     setForm({ name: "", logo: "", group: form.group });
   };
 
-  /* ---------- Elenco (CRUD sem permissão) ---------- */
+  /* ---------- Remoção de time ---------- */
+  const [removeForm, setRemoveForm] = useState({
+    group: "A",
+    teamName: "",
+    alsoDelete: true
+  });
+
+  useEffect(() => {
+    const names = teams[removeForm.group] || [];
+    const firstValid = names.find((n) => n && n !== "—") || "";
+    setRemoveForm((f) => ({ ...f, teamName: firstValid }));
+  }, [removeForm.group, teams]);
+
+  const removeTeam = () => {
+    const g = removeForm.group;
+    const name = removeForm.teamName;
+    if (!name) return;
+
+    const idx = (teams[g] || []).findIndex((n) => n === name);
+    if (idx === -1) {
+      setError("Não foi possível localizar o time selecionado.");
+      return;
+    }
+
+    const newGroupArr = [...teams[g]];
+    newGroupArr[idx] = "—";
+    const newTeams = { ...teams, [g]: newGroupArr };
+
+    let newRosters = rosters;
+    let newLogos = logos;
+    if (removeForm.alsoDelete) {
+      const { [name]: _, ...restR } = newRosters;
+      newRosters = restR;
+      const { [name]: __, ...restL } = newLogos;
+      newLogos = restL;
+    }
+
+    setTeams(newTeams);
+    setRosters(newRosters);
+    setLogos(newLogos);
+
+    if (sel && sel.name === name) setOpenTeam(null);
+  };
+
+  /* ---------- Renomear time (NOVO) ---------- */
+  const [renameForm, setRenameForm] = useState({
+    group: "A",
+    teamName: "",
+    newName: "",
+    moveLogo: true,
+    moveRoster: true,
+  });
+
+  // sincroniza time inicial do select ao trocar grupo
+  useEffect(() => {
+    const names = teams[renameForm.group] || [];
+    const firstValid = names.find((n) => n && n !== "—") || "";
+    setRenameForm((f) => ({ ...f, teamName: firstValid }));
+  }, [renameForm.group, teams]);
+
+  const renameTeam = () => {
+    const g = renameForm.group;
+    const oldName = renameForm.teamName;
+    const newName = renameForm.newName.trim();
+    if (!oldName || !newName) {
+      setError("Informe o time atual e o novo nome.");
+      return;
+    }
+    if (newName === "—") {
+      setError("Nome inválido.");
+      return;
+    }
+    // bloquear duplicado no mesmo grupo
+    if ((teams[g] || []).some((n) => n === newName)) {
+      setError("Já existe um time com esse nome neste grupo.");
+      return;
+    }
+
+    // troca na lista do grupo
+    const idx = teams[g].findIndex((n) => n === oldName);
+    if (idx === -1) {
+      setError("Time não encontrado no grupo selecionado.");
+      return;
+    }
+    const newGroupArr = [...teams[g]];
+    newGroupArr[idx] = newName;
+    const newTeams = { ...teams, [g]: newGroupArr };
+
+    // mover roster/logo se marcado
+    let newRosters = { ...rosters };
+    let newLogos = { ...logos };
+
+    if (renameForm.moveRoster && rosters[oldName]) {
+      newRosters[newName] = rosters[oldName];
+      delete newRosters[oldName];
+    }
+    if (renameForm.moveLogo && logos[oldName] !== undefined) {
+      newLogos[newName] = logos[oldName];
+      delete newLogos[oldName];
+    }
+
+    setTeams(newTeams);
+    setRosters(newRosters);
+    setLogos(newLogos);
+
+    // se modal aberto no time renomeado, mantém aberto (idx é o mesmo)
+    if (openTeam && openTeam.group === g && teams[g][openTeam.idx] === oldName) {
+      // nada a fazer: `sel` se reconstrói pelo índice
+    }
+
+    // limpa novo nome
+    setRenameForm((f) => ({ ...f, newName: "" }));
+    setError("");
+  };
+
+  /* ---------- Trocar vagas (swap) (NOVO) ---------- */
+  const [swapForm, setSwapForm] = useState({
+    group: "A",
+    i1: 0,
+    i2: 1,
+  });
+
+  const swapPositions = () => {
+    const g = swapForm.group;
+    const arr = [...(teams[g] || [])];
+    const n = arr.length;
+    const { i1, i2 } = swapForm;
+
+    if (i1 === i2) {
+      setError("Selecione índices diferentes para trocar.");
+      return;
+    }
+    if (i1 < 0 || i2 < 0 || i1 >= n || i2 >= n) {
+      setError("Índices fora do intervalo.");
+      return;
+    }
+
+    [arr[i1], arr[i2]] = [arr[i2], arr[i1]];
+    setTeams((t) => ({ ...t, [g]: arr }));
+    setError("");
+  };
+
+  /* ---------- Elenco (CRUD) ---------- */
   const addPlayer = () => {
     if (!sel) return;
     const key = sel.name;
@@ -270,15 +382,7 @@ export default function TimesCompeticao1() {
     setRosters((r) => ({
       ...r,
       [key]: (r[key] || []).map((pl) =>
-        pl.id === pid
-          ? {
-              ...pl,
-              [field]:
-                field === "gols" || field === "assistencias"
-                  ? Number(value || 0)
-                  : value,
-            }
-          : pl
+        pl.id === pid ? { ...pl, [field]: field === "gols" || field === "assistencias" ? Number(value || 0) : value } : pl
       ),
     }));
   };
@@ -346,6 +450,184 @@ export default function TimesCompeticao1() {
           </div>
         </div>
         {error && <p className="text-red-600 mt-2 text-sm">{error}</p>}
+      </div>
+
+      {/* Gerenciar / Remover / Renomear / Swap */}
+      <div className="mb-6 rounded-2xl border bg-gray-50 p-4">
+        <h2 className="font-semibold mb-4">Gerenciar times</h2>
+
+        {/* linha 1: remover */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+          <Field label="Grupo (remover)">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={removeForm.group}
+              onChange={(e) => setRemoveForm((f) => ({ ...f, group: e.target.value }))}
+            >
+              {["A", "B", "C", "D"].map((g) => (
+                <option key={g} value={g}>Grupo {g}</option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Time (remover)">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={removeForm.teamName}
+              onChange={(e) => setRemoveForm((f) => ({ ...f, teamName: e.target.value }))}
+            >
+              {(teams[removeForm.group] || []).map((name, i) => (
+                <option key={`${name}-${i}`} value={name} disabled={name === "—"}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label=" ">
+            <label className="inline-flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                checked={removeForm.alsoDelete}
+                onChange={(e) => setRemoveForm((f) => ({ ...f, alsoDelete: e.target.checked }))}
+              />
+              <span>Apagar elenco e logo</span>
+            </label>
+          </Field>
+
+          <div className="flex items-end">
+            <button
+              onClick={removeTeam}
+              disabled={!removeForm.teamName || removeForm.teamName === "—"}
+              className="w-full px-4 py-2 rounded-lg bg-red-600 text-white disabled:opacity-50"
+            >
+              Remover selecionado
+            </button>
+          </div>
+        </div>
+
+        <hr className="my-4" />
+
+        {/* linha 2: renomear */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+          <Field label="Grupo (renomear)">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={renameForm.group}
+              onChange={(e) => setRenameForm((f) => ({ ...f, group: e.target.value }))}
+            >
+              {["A", "B", "C", "D"].map((g) => (
+                <option key={g} value={g}>Grupo {g}</option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Time atual">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={renameForm.teamName}
+              onChange={(e) => setRenameForm((f) => ({ ...f, teamName: e.target.value }))}
+            >
+              {(teams[renameForm.group] || []).map((name, i) => (
+                <option key={`${name}-${i}`} value={name} disabled={name === "—"}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Novo nome">
+            <input
+              className="w-full rounded-lg border px-3 py-2"
+              value={renameForm.newName}
+              onChange={(e) => setRenameForm((f) => ({ ...f, newName: e.target.value }))}
+              placeholder="Ex.: Panteras FC"
+            />
+          </Field>
+
+          <Field label="Mover dados">
+            <div className="flex gap-3 mt-2">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={renameForm.moveRoster}
+                  onChange={(e) => setRenameForm((f) => ({ ...f, moveRoster: e.target.checked }))}
+                />
+                <span>Elenco</span>
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={renameForm.moveLogo}
+                  onChange={(e) => setRenameForm((f) => ({ ...f, moveLogo: e.target.checked }))}
+                />
+                <span>Logo</span>
+              </label>
+            </div>
+          </Field>
+
+          <div className="flex items-end">
+            <button
+              onClick={renameTeam}
+              disabled={!renameForm.teamName || renameForm.teamName === "—" || !renameForm.newName.trim()}
+              className="w-full px-4 py-2 rounded-lg bg-black text-white disabled:opacity-50"
+            >
+              Renomear
+            </button>
+          </div>
+        </div>
+
+        <hr className="my-4" />
+
+        {/* linha 3: swap */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+          <Field label="Grupo (trocar vagas)">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={swapForm.group}
+              onChange={(e) => setSwapForm((f) => ({ ...f, group: e.target.value }))}
+            >
+              {["A", "B", "C", "D"].map((g) => (
+                <option key={g} value={g}>Grupo {g}</option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Índice 1">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={swapForm.i1}
+              onChange={(e) => setSwapForm((f) => ({ ...f, i1: Number(e.target.value) }))}
+            >
+              {(teams[swapForm.group] || []).map((name, i) => (
+                <option key={`i1-${i}`} value={i}>{i} — {name}</option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Índice 2">
+            <select
+              className="w-full rounded-lg border px-3 py-2"
+              value={swapForm.i2}
+              onChange={(e) => setSwapForm((f) => ({ ...f, i2: Number(e.target.value) }))}
+            >
+              {(teams[swapForm.group] || []).map((name, i) => (
+                <option key={`i2-${i}`} value={i}>{i} — {name}</option>
+              ))}
+            </select>
+          </Field>
+
+          <div className="md:col-span-2 flex items-end">
+            <button
+              onClick={swapPositions}
+              className="w-full px-4 py-2 rounded-lg bg-indigo-600 text-white"
+            >
+              Trocar posições
+            </button>
+          </div>
+        </div>
+
+        {error && <p className="text-red-600 mt-3 text-sm">{error}</p>}
       </div>
 
       {/* Filtros */}
@@ -439,6 +721,23 @@ export default function TimesCompeticao1() {
               </div>
             </div>
 
+            {/* remover direto do modal */}
+            <div className="mb-4">
+              <button
+                className="px-3 py-2 rounded-lg bg-red-600 text-white text-sm"
+                onClick={() => {
+                  setRemoveForm({
+                    group: openTeam.group,
+                    teamName: sel.name,
+                    alsoDelete: true,
+                  });
+                  removeTeam();
+                }}
+              >
+                Remover este time (apagar elenco e logo)
+              </button>
+            </div>
+
             {/* stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               <BigStat label="Pontos" value={sel.stats.pts} />
@@ -451,7 +750,7 @@ export default function TimesCompeticao1() {
               <BigStat label="Jogos" value={sel.stats.v + sel.stats.e + sel.stats.d} />
             </div>
 
-            {/* elenco – “cartinhas” */}
+            {/* elenco */}
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-semibold">Elenco</h3>
               <button
@@ -486,9 +785,7 @@ export default function TimesCompeticao1() {
                           type="file"
                           accept="image/*"
                           className="hidden"
-                          onChange={(e) =>
-                            uploadPlayerPhoto(p.id, e.target.files?.[0])
-                          }
+                          onChange={(e) => uploadPlayerPhoto(p.id, e.target.files?.[0])}
                         />
                       </label>
                     </div>
@@ -500,18 +797,14 @@ export default function TimesCompeticao1() {
                           <input
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.nome}
-                            onChange={(e) =>
-                              updatePlayer(p.id, "nome", e.target.value)
-                            }
+                            onChange={(e) => updatePlayer(p.id, "nome", e.target.value)}
                           />
                         </Field>
                         <Field label="Número">
                           <input
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.numero}
-                            onChange={(e) =>
-                              updatePlayer(p.id, "numero", e.target.value)
-                            }
+                            onChange={(e) => updatePlayer(p.id, "numero", e.target.value)}
                           />
                         </Field>
                       </div>
@@ -521,31 +814,25 @@ export default function TimesCompeticao1() {
                           <input
                             className="rounded-lg border px-2 py-1 flex-1"
                             value={p.posicao}
-                            onChange={(e) =>
-                              updatePlayer(p.id, "posicao", e.target.value)
-                            }
+                            onChange={(e) => updatePlayer(p.id, "posicao", e.target.value)}
                             placeholder="Ex.: MEI"
                           />
                         </div>
                         <div className="mt-2 flex flex-wrap gap-2">
-                          {["GOL", "ZAG", "LAT", "VOL", "MEI", "PON", "ATA"].map(
-                            (pos) => (
-                              <button
-                                key={pos}
-                                onClick={() =>
-                                  updatePlayer(p.id, "posicao", pos)
-                                }
-                                className={`px-2 py-1 rounded-md text-xs font-semibold border ${
-                                  p.posicao === pos
-                                    ? "bg-black text-white border-black"
-                                    : "bg-white text-black border-black hover:bg-black/10"
-                                }`}
-                                type="button"
-                              >
-                                {pos}
-                              </button>
-                            )
-                          )}
+                          {POS_SHORTCUTS.map((pos) => (
+                            <button
+                              key={pos}
+                              onClick={() => updatePlayer(p.id, "posicao", pos)}
+                              className={`px-2 py-1 rounded-md text-xs font-semibold border ${
+                                p.posicao === pos
+                                  ? "bg-black text-white border-black"
+                                  : "bg-white text-black border-black hover:bg-black/10"
+                              }`}
+                              type="button"
+                            >
+                              {pos}
+                            </button>
+                          ))}
                         </div>
                       </Field>
 
@@ -555,9 +842,7 @@ export default function TimesCompeticao1() {
                             type="number"
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.gols ?? 0}
-                            onChange={(e) =>
-                              updatePlayer(p.id, "gols", e.target.value)
-                            }
+                            onChange={(e) => updatePlayer(p.id, "gols", e.target.value)}
                           />
                         </Field>
                         <Field label="Assistências">
@@ -565,9 +850,7 @@ export default function TimesCompeticao1() {
                             type="number"
                             className="w-full rounded-lg border px-2 py-1"
                             value={p.assistencias ?? 0}
-                            onChange={(e) =>
-                              updatePlayer(p.id, "assistencias", e.target.value)
-                            }
+                            onChange={(e) => updatePlayer(p.id, "assistencias", e.target.value)}
                           />
                         </Field>
                       </div>
@@ -576,9 +859,7 @@ export default function TimesCompeticao1() {
                         <input
                           className="w-full rounded-lg border px-2 py-1"
                           value={p.foto}
-                          onChange={(e) =>
-                            updatePlayer(p.id, "foto", e.target.value)
-                          }
+                          onChange={(e) => updatePlayer(p.id, "foto", e.target.value)}
                           placeholder="https://… (opcional se fez upload)"
                         />
                       </Field>
@@ -587,10 +868,8 @@ export default function TimesCompeticao1() {
                         <textarea
                           className="w-full rounded-lg border px-2 py-1"
                           rows={2}
-                          value={p.bio || ""}
-                          onChange={(e) =>
-                            updatePlayer(p.id, "bio", e.target.value)
-                          }
+                          value={p.bio}
+                          onChange={(e) => updatePlayer(p.id, "bio", e.target.value)}
                         />
                       </Field>
 

@@ -19,16 +19,50 @@ function Tabs({ tab, setTab }) {
   );
 }
 
+/* ---------------- Mini Modal ---------------- */
+function Modal({ open, onClose, children }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-x-0 top-10 mx-auto max-w-xl bg-white rounded-2xl shadow-xl p-6">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Card do Jogo (chaveamento) ---------------- */
-const MatchCard = forwardRef(function MatchCard({ value, onChange, disabled }, ref) {
+const MatchCard = forwardRef(function MatchCard(
+  { value, onChange, disabled, onOpenPens },
+  ref
+) {
   const set = (k, v) => onChange({ ...value, [k]: v === "" ? "" : Number(v) });
   const done = value.golsA !== "" && value.golsB !== "";
-  const winA = done && value.golsA > value.golsB;
-  const winB = done && value.golsB > value.golsA;
+  const tie = done && Number(value.golsA) === Number(value.golsB);
+
+  const sum = (arr) =>
+    Array.isArray(arr) ? arr.reduce((s, x) => s + (x ? 1 : 0), 0) : null;
+  const pA = sum(value.pA);
+  const pB = sum(value.pB);
+  const hasPens = pA !== null && pB !== null;
+
+  const winA =
+    (done && Number(value.golsA) > Number(value.golsB)) ||
+    (tie && hasPens && pA > pB);
+  const winB =
+    (done && Number(value.golsB) > Number(value.golsA)) ||
+    (tie && hasPens && pB > pA);
+
   const inputCls =
-    "w-14 rounded-md text-center " + (disabled ? "bg-white/70 text-black/60" : "text-black");
+    "w-14 rounded-md text-center " +
+    (disabled ? "bg-white/70 text-black/60" : "text-black");
+
   return (
-    <div ref={ref} className="w-64 bg-gradient-to-b from-violet-600 to-purple-700 text-white rounded-2xl shadow-md p-4">
+    <div
+      ref={ref}
+      className="w-64 bg-gradient-to-b from-violet-600 to-purple-700 text-white rounded-2xl shadow-md p-4"
+    >
       <div className="flex items-center justify-between gap-3">
         <span className={`truncate ${winA ? "font-bold" : ""}`}>{value.timeA}</span>
         <input
@@ -49,6 +83,29 @@ const MatchCard = forwardRef(function MatchCard({ value, onChange, disabled }, r
           className={inputCls}
         />
       </div>
+
+      {/* Pênaltis */}
+      <div className="mt-3 text-xs">
+        {tie ? (
+          <div className="flex items-center justify-between">
+            {hasPens ? (
+              <span className="font-semibold">Pênaltis: {pA}–{pB}</span>
+            ) : (
+              <span className="opacity-90">Empate — definir pênaltis</span>
+            )}
+            {!disabled && (
+              <button
+                onClick={onOpenPens}
+                className="px-2 py-1 rounded bg-black/20 hover:bg-black/30"
+              >
+                Definir pênaltis
+              </button>
+            )}
+          </div>
+        ) : hasPens ? (
+          <span className="font-semibold">Pênaltis: {pA}–{pB}</span>
+        ) : null}
+      </div>
     </div>
   );
 });
@@ -61,28 +118,44 @@ function calcTable(teams, matches) {
   const rows = teams.map((n) => emptyTeamRow(n));
   for (const m of matches) {
     if (m.ga === "" || m.gb === "") continue;
-    const ga = Number(m.ga), gb = Number(m.gb);
-    const A = rows[m.a], B = rows[m.b];
-    A.gp += ga; A.gc += gb; A.sg = A.gp - A.gc;
-    B.gp += gb; B.gc += ga; B.sg = B.gp - B.gc;
-    if (ga > gb) { A.v++; A.pts += 3; B.d++; }
-    else if (gb > ga) { B.v++; B.pts += 3; A.d++; }
-    else { A.e++; B.e++; A.pts++; B.pts++; }
+    const ga = Number(m.ga),
+      gb = Number(m.gb);
+    const A = rows[m.a],
+      B = rows[m.b];
+    A.gp += ga;
+    A.gc += gb;
+    A.sg = A.gp - A.gc;
+    B.gp += gb;
+    B.gc += ga;
+    B.sg = B.gp - B.gc;
+    if (ga > gb) {
+      A.v++;
+      A.pts += 3;
+      B.d++;
+    } else if (gb > ga) {
+      B.v++;
+      B.pts += 3;
+      A.d++;
+    } else {
+      A.e++;
+      B.e++;
+      A.pts++;
+      B.pts++;
+    }
   }
   return rows;
 }
 function rank(rows) {
   return [...rows].sort((a, b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
-    if (b.v   !== a.v)   return b.v   - a.v;       // vitórias
-    if (b.sg  !== a.sg)  return b.sg  - a.sg;      // saldo
+    if (b.v !== a.v) return b.v - a.v; // vitórias
+    if (b.sg !== a.sg) return b.sg - a.sg; // saldo
     return a.time.localeCompare(b.time);
   });
 }
 
 /* ---------------- Partidas round-robin para 4 times ---------------- */
 function fixtures4() {
-  // todos se enfrentam 1x: 6 jogos
   return [
     { id: 1, a: 0, b: 1, ga: "", gb: "" },
     { id: 2, a: 2, b: 3, ga: "", gb: "" },
@@ -98,8 +171,6 @@ function fixtures4() {
 ========================================================= */
 export default function TabelaCompeticao1() {
   const [tab, setTab] = useState("grupos");
-
-  /* ----- modo edição (sempre disponível) ----- */
   const [isEdit, setIsEdit] = useState(false);
 
   /* Times por grupo (editáveis) */
@@ -115,22 +186,34 @@ export default function TabelaCompeticao1() {
 
   /* Carrega/Persiste */
   const load = (k, def) => {
-    try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; }
+    try {
+      return JSON.parse(localStorage.getItem(k)) ?? def;
+    } catch {
+      return def;
+    }
   };
-  const [teams, setTeams]     = useState(() => load("c1-teams", teamsInit));
+  const [teams, setTeams] = useState(() => load("c1-teams", teamsInit));
   const [matches, setMatches] = useState(() =>
-    load("c1-matches", { A: fixtures4(), B: fixtures4(), C: fixtures4(), D: fixtures4() })
+    load("c1-matches", {
+      A: fixtures4(),
+      B: fixtures4(),
+      C: fixtures4(),
+      D: fixtures4(),
+    })
   );
 
-  const [draftTeams, setDraftTeams]     = useState(teams);
+  const [draftTeams, setDraftTeams] = useState(teams);
   const [draftMatches, setDraftMatches] = useState(matches);
 
-  useEffect(() => { setDraftTeams(teams); setDraftMatches(matches); }, [teams, matches]);
+  useEffect(() => {
+    setDraftTeams(teams);
+    setDraftMatches(matches);
+  }, [teams, matches]);
 
   const saveAll = () => {
     setTeams(draftTeams);
     setMatches(draftMatches);
-    localStorage.setItem("c1-teams",   JSON.stringify(draftTeams));
+    localStorage.setItem("c1-teams", JSON.stringify(draftTeams));
     localStorage.setItem("c1-matches", JSON.stringify(draftMatches));
     setIsEdit(false);
   };
@@ -140,81 +223,131 @@ export default function TabelaCompeticao1() {
     setIsEdit(false);
   };
 
-  /* Tabelas calculadas (sempre calculando sobre *draft* quando editando) */
-  const effTeams   = isEdit ? draftTeams   : teams;
+  /* Tabelas calculadas */
+  const effTeams = isEdit ? draftTeams : teams;
   const effMatches = isEdit ? draftMatches : matches;
 
-  const tables = useMemo(() => ({
-    A: calcTable(effTeams.A, effMatches.A),
-    B: calcTable(effTeams.B, effMatches.B),
-    C: calcTable(effTeams.C, effMatches.C),
-    D: calcTable(effTeams.D, effMatches.D),
-  }), [effTeams, effMatches]);
+  const tables = useMemo(
+    () => ({
+      A: calcTable(effTeams.A, effMatches.A),
+      B: calcTable(effTeams.B, effMatches.B),
+      C: calcTable(effTeams.C, effMatches.C),
+      D: calcTable(effTeams.D, effMatches.D),
+    }),
+    [effTeams, effMatches]
+  );
 
-  /* Classificação (top2) → quartas */
-  const ranked = useMemo(() => ({
-    A: rank(tables.A), B: rank(tables.B), C: rank(tables.C), D: rank(tables.D)
-  }), [tables]);
+  const ranked = useMemo(
+    () => ({
+      A: rank(tables.A),
+      B: rank(tables.B),
+      C: rank(tables.C),
+      D: rank(tables.D),
+    }),
+    [tables]
+  );
 
   /* ------ Chaveamento ------ */
+  const emptyKO = { golsA: "", golsB: "", pA: null, pB: null };
   const [quartasLeft, setQuartasLeft] = useState([
-    { id: 1, timeA: "—", timeB: "—", golsA: "", golsB: "" },
-    { id: 2, timeA: "—", timeB: "—", golsA: "", golsB: "" },
+    { id: 1, timeA: "—", timeB: "—", ...emptyKO },
+    { id: 2, timeA: "—", timeB: "—", ...emptyKO },
   ]);
   const [quartasRight, setQuartasRight] = useState([
-    { id: 3, timeA: "—", timeB: "—", golsA: "", golsB: "" },
-    { id: 4, timeA: "—", timeB: "—", golsA: "", golsB: "" },
+    { id: 3, timeA: "—", timeB: "—", ...emptyKO },
+    { id: 4, timeA: "—", timeB: "—", ...emptyKO },
   ]);
-  const [semiLeft, setSemiLeft]   = useState([{ id: 5, timeA: "—", timeB: "—", golsA: "", golsB: "" }]);
-  const [semiRight, setSemiRight] = useState([{ id: 6, timeA: "—", timeB: "—", golsA: "", golsB: "" }]);
-  const [finale, setFinale]       = useState([{ id: 7, timeA: "—", timeB: "—", golsA: "", golsB: "" }]);
+  const [semiLeft, setSemiLeft] = useState([
+    { id: 5, timeA: "—", timeB: "—", ...emptyKO },
+  ]);
+  const [semiRight, setSemiRight] = useState([
+    { id: 6, timeA: "—", timeB: "—", ...emptyKO },
+  ]);
+  const [finale, setFinale] = useState([
+    { id: 7, timeA: "—", timeB: "—", ...emptyKO },
+  ]);
 
   // monta quartas sempre que ranking mudar
   useEffect(() => {
-    const a1 = ranked.A[0]?.time ?? "—", a2 = ranked.A[1]?.time ?? "—";
-    const b1 = ranked.B[0]?.time ?? "—", b2 = ranked.B[1]?.time ?? "—";
-    const c1 = ranked.C[0]?.time ?? "—", c2 = ranked.C[1]?.time ?? "—";
-    const d1 = ranked.D[0]?.time ?? "—", d2 = ranked.D[1]?.time ?? "—";
-    setQuartasLeft((p)  => [{ ...p[0], timeA: a1, timeB: b2 }, { ...p[1], timeA: b1, timeB: a2 }]);
-    setQuartasRight((p) => [{ ...p[0], timeA: c1, timeB: d2 }, { ...p[1], timeA: d1, timeB: c2 }]);
+    const a1 = ranked.A[0]?.time ?? "—",
+      a2 = ranked.A[1]?.time ?? "—";
+    const b1 = ranked.B[0]?.time ?? "—",
+      b2 = ranked.B[1]?.time ?? "—";
+    const c1 = ranked.C[0]?.time ?? "—",
+      c2 = ranked.C[1]?.time ?? "—";
+    const d1 = ranked.D[0]?.time ?? "—",
+      d2 = ranked.D[1]?.time ?? "—";
+    setQuartasLeft((p) => [
+      { ...p[0], timeA: a1, timeB: b2 },
+      { ...p[1], timeA: b1, timeB: a2 },
+    ]);
+    setQuartasRight((p) => [
+      { ...p[0], timeA: c1, timeB: d2 },
+      { ...p[1], timeA: d1, timeB: c2 },
+    ]);
   }, [ranked]);
+
+  // helpers pênaltis
+  const pensSum = (arr) =>
+    Array.isArray(arr) ? arr.reduce((s, x) => s + (x ? 1 : 0), 0) : null;
+  const allFilled = (arr) => Array.isArray(arr) && arr.every((v) => v !== null);
+  const validShootout = (m) =>
+    Array.isArray(m.pA) &&
+    Array.isArray(m.pB) &&
+    m.pA.length === m.pB.length &&
+    m.pA.length >= 5 &&
+    allFilled(m.pA) &&
+    allFilled(m.pB) &&
+    pensSum(m.pA) !== pensSum(m.pB);
+
+  const winnerOf = (m) => {
+    const done = m.golsA !== "" && m.golsB !== "";
+    if (!done) return "—";
+    if (m.golsA > m.golsB) return m.timeA;
+    if (m.golsB > m.golsA) return m.timeB;
+    // empate → pênaltis
+    if (validShootout(m)) {
+      return pensSum(m.pA) > pensSum(m.pB) ? m.timeA : m.timeB;
+    }
+    return "—";
+  };
 
   // winners fluindo
   useEffect(() => {
-    const wTop =  quartasLeft[0].golsA !== "" && quartasLeft[0].golsB !== "" ? (quartasLeft[0].golsA > quartasLeft[0].golsB ? quartasLeft[0].timeA : quartasLeft[0].timeB) : "—";
-    const wBot =  quartasLeft[1].golsA !== "" && quartasLeft[1].golsB !== "" ? (quartasLeft[1].golsA > quartasLeft[1].golsB ? quartasLeft[1].timeA : quartasLeft[1].timeB) : "—";
+    const wTop = winnerOf(quartasLeft[0]);
+    const wBot = winnerOf(quartasLeft[1]);
     setSemiLeft((prev) => prev.map((s) => ({ ...s, timeA: wTop, timeB: wBot })));
   }, [quartasLeft]);
   useEffect(() => {
-    const wTop =  quartasRight[0].golsA !== "" && quartasRight[0].golsB !== "" ? (quartasRight[0].golsA > quartasRight[0].golsB ? quartasRight[0].timeA : quartasRight[0].timeB) : "—";
-    const wBot =  quartasRight[1].golsA !== "" && quartasRight[1].golsB !== "" ? (quartasRight[1].golsA > quartasRight[1].golsB ? quartasRight[1].timeA : quartasRight[1].timeB) : "—";
+    const wTop = winnerOf(quartasRight[0]);
+    const wBot = winnerOf(quartasRight[1]);
     setSemiRight((prev) => prev.map((s) => ({ ...s, timeA: wTop, timeB: wBot })));
   }, [quartasRight]);
   useEffect(() => {
-    const wl = semiLeft[0].golsA  !== "" && semiLeft[0].golsB  !== "" ? (semiLeft[0].golsA  > semiLeft[0].golsB  ? semiLeft[0].timeA  : semiLeft[0].timeB ) : "—";
-    const wr = semiRight[0].golsA !== "" && semiRight[0].golsB !== "" ? (semiRight[0].golsA > semiRight[0].golsB ? semiRight[0].timeA : semiRight[0].timeB) : "—";
+    const wl = winnerOf(semiLeft[0]);
+    const wr = winnerOf(semiRight[0]);
     setFinale((prev) => prev.map((f) => ({ ...f, timeA: wl, timeB: wr })));
   }, [semiLeft, semiRight]);
 
   /* ------ refs/linhas (redesenho robusto) ------ */
   const containerRef = useRef(null);
-  const qlRefs  = [useRef(null), useRef(null)];
-  const slRef   = useRef(null);
-  const finalRef= useRef(null);
-  const srRef   = useRef(null);
-  const qrRefs  = [useRef(null), useRef(null)];
+  const qlRefs = [useRef(null), useRef(null)];
+  const slRef = useRef(null);
+  const finalRef = useRef(null);
+  const srRef = useRef(null);
+  const qrRefs = [useRef(null), useRef(null)];
 
   const getCenterRight = (ref) => {
     const c = containerRef.current;
     if (!c || !ref?.current) return null;
-    const r  = ref.current.getBoundingClientRect();
+    const r = ref.current.getBoundingClientRect();
     const rc = c.getBoundingClientRect();
     return { x: r.right - rc.left, y: r.top + r.height / 2 - rc.top };
   };
   const getCenterLeft = (ref) => {
     const c = containerRef.current;
     if (!c || !ref?.current) return null;
-    const r  = ref.current.getBoundingClientRect();
+    const r = ref.current.getBoundingClientRect();
     const rc = c.getBoundingClientRect();
     return { x: r.left - rc.left, y: r.top + r.height / 2 - rc.top };
   };
@@ -224,7 +357,7 @@ export default function TabelaCompeticao1() {
     return `M ${p1.x},${p1.y} H ${mid} V ${p2.y} H ${p2.x}`;
   };
 
-  // força redesenho
+  // força redesenho linhas
   const [tick, force] = useState(0);
   useEffect(() => {
     if (!containerRef.current) return;
@@ -233,20 +366,15 @@ export default function TabelaCompeticao1() {
     const onScroll = () => force((t) => t + 1);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-    // desenho inicial ao abrir/entrar na aba
-    const kick = () => requestAnimationFrame(() => force((t) => t + 1));
-    kick();
+    requestAnimationFrame(() => force((t) => t + 1));
     return () => {
       ro.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
   }, []);
-
-  // sempre que abrir a aba "chave" ou mudar algum card, redesenha
   useEffect(() => {
     if (tab !== "chave") return;
-    // dois frames para garantir refs posicionadas
     requestAnimationFrame(() => force((t) => t + 1));
     setTimeout(() => force((t) => t + 1), 0);
   }, [tab, quartasLeft, quartasRight, semiLeft, semiRight, finale]);
@@ -262,13 +390,123 @@ export default function TabelaCompeticao1() {
       ),
     }));
 
+  // localizar e atualizar partidas do mata-mata por id
+  const updateKO = (id, updater) => {
+    const apply = (arr) => arr.map((m) => (m.id === id ? updater(m) : m));
+    if ([1, 2].includes(id)) setQuartasLeft((arr) => apply(arr));
+    else if ([3, 4].includes(id)) setQuartasRight((arr) => apply(arr));
+    else if (id === 5) setSemiLeft((arr) => apply(arr));
+    else if (id === 6) setSemiRight((arr) => apply(arr));
+    else if (id === 7) setFinale((arr) => apply(arr));
+  };
+
+  /* ------ Modal de Pênaltis (com morte súbita) ------ */
+  const [penModal, setPenModal] = useState({ open: false, match: null });
+
+  const ensureLen = (arr, n) => {
+    const out = Array.isArray(arr) ? [...arr] : [];
+    while (out.length < n) out.push(null);
+    return out;
+    };
+  const openPensFor = (m) => {
+    if (!isEdit) return;
+    setPenModal({
+      open: true,
+      match: {
+        ...m,
+        pA: ensureLen(m.pA, 5),
+        pB: ensureLen(m.pB, 5),
+      },
+    });
+  };
+  const toggleKick = (team, i) => {
+    setPenModal((pm) => {
+      const next = { ...pm.match };
+      const key = team === "A" ? "pA" : "pB";
+      const cur = [...next[key]];
+      const v = cur[i];
+      cur[i] = v === null ? true : v === true ? false : null; // null -> ✓ -> ✕ -> null
+      next[key] = cur;
+      return { ...pm, match: next };
+    });
+  };
+  const addSudden = () => {
+    setPenModal((pm) => {
+      const n = Math.max(pm.match.pA.length, pm.match.pB.length) + 1;
+      return {
+        ...pm,
+        match: {
+          ...pm.match,
+          pA: ensureLen(pm.match.pA, n),
+          pB: ensureLen(pm.match.pB, n),
+        },
+      };
+    });
+  };
+  const removeSudden = () => {
+    setPenModal((pm) => {
+      const len = pm.match.pA.length;
+      if (len <= 5) return pm;
+      const trim = (arr) => arr.slice(0, len - 1);
+      return { ...pm, match: { ...pm.match, pA: trim(pm.match.pA), pB: trim(pm.match.pB) } };
+    });
+  };
+  const clearPens = () => {
+    setPenModal((pm) => ({
+      ...pm,
+      match: { ...pm.match, pA: ensureLen([], 5), pB: ensureLen([], 5) },
+    }));
+  };
+  const canSavePens = () => {
+    const m = penModal.match;
+    if (!m) return false;
+    const sA = pensSum(m.pA);
+    const sB = pensSum(m.pB);
+    return (
+      m.pA.length === m.pB.length &&
+      m.pA.length >= 5 &&
+      allFilled(m.pA) &&
+      allFilled(m.pB) &&
+      sA !== sB
+    );
+  };
+  const savePens = () => {
+    if (!canSavePens()) return;
+    const m = penModal.match;
+    updateKO(m.id, (old) => ({ ...old, pA: m.pA, pB: m.pB }));
+    setPenModal({ open: false, match: null });
+  };
+
+  const PenRow = ({ label, arr, onClick }) => (
+    <div>
+      <div className="text-sm font-medium mb-2">{label}</div>
+      <div className="flex flex-wrap gap-2">
+        {arr.map((v, i) => (
+          <button
+            key={i}
+            onClick={() => onClick(i)}
+            className={`w-10 h-10 rounded-full border flex items-center justify-center text-lg ${
+              v === null
+                ? "bg-white"
+                : v
+                ? "bg-green-600 text-white"
+                : "bg-red-600 text-white"
+            }`}
+            title={v === null ? "não cobrado" : v ? "acertou" : "errou"}
+          >
+            {v === null ? "•" : v ? "✓" : "✕"}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   /* ===================== UI ===================== */
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-black">Competição 1 • Tabela</h1>
 
-        {/* Botões de edição SEMPRE visíveis */}
         {!isEdit ? (
           <button
             onClick={() => setIsEdit(true)}
@@ -299,7 +537,7 @@ export default function TabelaCompeticao1() {
       {/* ======== GRUPOS ======== */}
       {tab === "grupos" && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {(["A","B","C","D"]).map((g) => (
+          {["A", "B", "C", "D"].map((g) => (
             <div key={g} className="bg-purple-700 rounded-xl p-4 shadow-lg text-white">
               <h2 className="text-xl font-semibold mb-3">Grupo {g}</h2>
 
@@ -308,7 +546,10 @@ export default function TabelaCompeticao1() {
                 {(isEdit ? draftTeams : teams)[g].map((n, i) => (
                   <input
                     key={i}
-                    className={"rounded px-2 py-1 " + (isEdit ? "text-black" : "bg-white/70 text-black/70")}
+                    className={
+                      "rounded px-2 py-1 " +
+                      (isEdit ? "text-black" : "bg-white/70 text-black/70")
+                    }
                     readOnly={!isEdit}
                     value={n}
                     onChange={(e) => setTeamName(g, i, e.target.value)}
@@ -353,23 +594,37 @@ export default function TabelaCompeticao1() {
                 {(isEdit ? draftMatches : matches)[g].map((m) => (
                   <div key={m.id} className="bg-purple-800/70 rounded-lg p-3">
                     <div className="flex items-center gap-2">
-                      <span className="flex-1 truncate">{(isEdit ? draftTeams : teams)[g][m.a]}</span>
+                      <span className="flex-1 truncate">
+                        {(isEdit ? draftTeams : teams)[g][m.a]}
+                      </span>
                       <input
                         type="number"
-                        className={"w-12 text-center rounded " + (isEdit ? "text-black" : "bg-white/70 text-black/60")}
+                        className={
+                          "w-12 text-center rounded " +
+                          (isEdit ? "text-black" : "bg-white/70 text-black/60")
+                        }
                         readOnly={!isEdit}
                         value={m.ga}
-                        onChange={(e) => setMatchScore(g, m.id, "ga", e.target.value)}
+                        onChange={(e) =>
+                          setMatchScore(g, m.id, "ga", e.target.value)
+                        }
                       />
                       <span className="mx-1 text-white/80">x</span>
                       <input
                         type="number"
-                        className={"w-12 text-center rounded " + (isEdit ? "text-black" : "bg-white/70 text-black/60")}
+                        className={
+                          "w-12 text-center rounded " +
+                          (isEdit ? "text-black" : "bg-white/70 text-black/60")
+                        }
                         readOnly={!isEdit}
                         value={m.gb}
-                        onChange={(e) => setMatchScore(g, m.id, "gb", e.target.value)}
+                        onChange={(e) =>
+                          setMatchScore(g, m.id, "gb", e.target.value)
+                        }
                       />
-                      <span className="flex-1 text-right truncate">{(isEdit ? draftTeams : teams)[g][m.b]}</span>
+                      <span className="flex-1 text-right truncate">
+                        {(isEdit ? draftTeams : teams)[g][m.b]}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -382,74 +637,110 @@ export default function TabelaCompeticao1() {
       {/* ======== CHAVEAMENTO ======== */}
       {tab === "chave" && (
         <div className="min-h-[70vh] flex items-center mt-2">
-          <div ref={containerRef} className="relative w-full overflow-x-auto px-6 md:px-12">
+          <div
+            ref={containerRef}
+            className="relative w-full overflow-x-auto px-6 md:px-12"
+          >
             <div className="mx-auto flex items-center justify-center gap-16 md:gap-24 min-w-[1000px]">
               {/* Quartas - ESQ */}
               <div className="flex flex-col gap-24 pl-2 md:pl-6">
-                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">Quartas</div>
+                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">
+                  Quartas
+                </div>
                 {quartasLeft.map((m, i) => (
                   <MatchCard
                     key={m.id}
                     ref={qlRefs[i]}
                     value={m}
-                    onChange={(v) => setQuartasLeft((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setQuartasLeft((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
+                    onOpenPens={() => openPensFor(m)}
                   />
                 ))}
               </div>
 
               {/* Semi ESQ */}
               <div className="flex flex-col gap-24">
-                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">Semi-Final</div>
+                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">
+                  Semi-Final
+                </div>
                 {semiLeft.map((m) => (
                   <MatchCard
                     key={m.id}
                     ref={slRef}
                     value={m}
-                    onChange={(v) => setSemiLeft((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setSemiLeft((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
+                    onOpenPens={() => openPensFor(m)}
                   />
                 ))}
               </div>
 
               {/* Final */}
               <div className="flex flex-col gap-24">
-                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">Final</div>
+                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">
+                  Final
+                </div>
                 {finale.map((m) => (
                   <MatchCard
                     key={m.id}
                     ref={finalRef}
                     value={m}
-                    onChange={(v) => setFinale((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setFinale((arr) => arr.map((x) => (x.id === m.id ? v : x)))
+                    }
                     disabled={!isEdit}
+                    onOpenPens={() => openPensFor(m)}
                   />
                 ))}
               </div>
 
               {/* Semi DIR */}
               <div className="flex flex-col gap-24">
-                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">Semi-Final</div>
+                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1">
+                  Semi-Final
+                </div>
                 {semiRight.map((m) => (
                   <MatchCard
                     key={m.id}
                     ref={srRef}
                     value={m}
-                    onChange={(v) => setSemiRight((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setSemiRight((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
+                    onOpenPens={() => openPensFor(m)}
                   />
                 ))}
               </div>
 
               {/* Quartas - DIR */}
               <div className="flex flex-col gap-24 pr-2 md:pr-6">
-                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1 text-right">Quartas</div>
+                <div className="text-xs md:text-sm font-semibold text-black uppercase tracking-wide mb-1 text-right">
+                  Quartas
+                </div>
                 {quartasRight.map((m, i) => (
                   <MatchCard
                     key={m.id}
                     ref={qrRefs[i]}
                     value={m}
-                    onChange={(v) => setQuartasRight((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setQuartasRight((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
+                    onOpenPens={() => openPensFor(m)}
                   />
                 ))}
               </div>
@@ -457,21 +748,131 @@ export default function TabelaCompeticao1() {
 
             {/* Linhas pretas conectando */}
             <svg
-              key={tick} // força re-render do SVG quando tick muda
+              key={tick}
               className="pointer-events-none absolute inset-0"
               width={containerRef.current?.scrollWidth ?? 1200}
               height={containerRef.current?.scrollHeight ?? 500}
             >
-              <path d={makePath(getCenterRight(qlRefs[0]), getCenterLeft(slRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(qlRefs[1]), getCenterLeft(slRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(slRef), getCenterLeft(finalRef))}  stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(finalRef), getCenterLeft(srRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[0]))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[1]))} stroke="#111827" strokeWidth="4" fill="none" />
+              <path
+                d={makePath(getCenterRight(qlRefs[0]), getCenterLeft(slRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(qlRefs[1]), getCenterLeft(slRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(slRef), getCenterLeft(finalRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(finalRef), getCenterLeft(srRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[0]))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[1]))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
             </svg>
           </div>
         </div>
       )}
+
+      {/* ---- Modal de Pênaltis (com morte súbita) ---- */}
+      <Modal
+        open={penModal.open}
+        onClose={() => setPenModal({ open: false, match: null })}
+      >
+        {penModal.match && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">
+              Pênaltis — Jogo #{penModal.match.id}
+            </h3>
+            <div className="space-y-4">
+              <PenRow
+                label={penModal.match.timeA}
+                arr={penModal.match.pA}
+                onClick={(i) => toggleKick("A", i)}
+              />
+              <PenRow
+                label={penModal.match.timeB}
+                arr={penModal.match.pB}
+                onClick={(i) => toggleKick("B", i)}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 justify-between">
+              <div className="flex gap-2">
+                <button
+                  onClick={clearPens}
+                  className="px-3 py-2 rounded-lg bg-gray-200 text-black"
+                >
+                  Limpar (volta p/ 5)
+                </button>
+                <button
+                  onClick={removeSudden}
+                  className="px-3 py-2 rounded-lg bg-gray-200 text-black"
+                >
+                  Remover última rodada
+                </button>
+              </div>
+
+              <div className="text-sm text-gray-700">
+                {(() => {
+                  const m = penModal.match;
+                  const sA = pensSum(m.pA);
+                  const sB = pensSum(m.pB);
+                  const filled = allFilled(m.pA) && allFilled(m.pB);
+                  if (!filled) return "Marque todas as cobranças desta série.";
+                  if (m.pA.length < 5) return "São necessárias pelo menos 5 cobranças.";
+                  if (sA === sB)
+                    return (
+                      <>
+                        Empate {sA}×{sB} — adicione{" "}
+                        <strong>morte súbita</strong>.
+                      </>
+                    );
+                  return sA > sB
+                    ? `Vencedor: ${m.timeA} (${sA}×${sB})`
+                    : `Vencedor: ${m.timeB} (${sB}×${sA})`;
+                })()}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={addSudden}
+                  className="px-3 py-2 rounded-lg bg-black text-white"
+                >
+                  Adicionar morte súbita
+                </button>
+                <button
+                  onClick={savePens}
+                  disabled={!canSavePens()}
+                  className="px-4 py-2 rounded-lg bg-violet-600 text-white disabled:opacity-50"
+                >
+                  Salvar pênaltis
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
