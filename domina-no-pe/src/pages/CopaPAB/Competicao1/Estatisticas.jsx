@@ -84,10 +84,12 @@ export default function EstatisticasCompeticao1() {
   }, [teams]);
 
   // lista plana de jogadoras com time + grupo
+  // *** ALTERAÇÃO: ignorar jogadoras cujos times NÃO estão em c1-teams ***
   const allPlayers = useMemo(() => {
     const out = [];
     Object.entries(rosters).forEach(([teamName, players]) => {
-      const g = teamToGroup[teamName] || "—";
+      const g = teamToGroup[teamName]; // undefined se o time não existe mais
+      if (!g) return; // <- exclui “fantasmas”
       (players || []).forEach((p) => {
         const gols = Number(p.gols || 0);
         const assist = Number(p.assistencias || 0);
