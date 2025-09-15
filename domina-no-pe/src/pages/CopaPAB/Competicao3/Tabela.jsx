@@ -1,3 +1,4 @@
+// src/pages/CopaPAB/Competicao3/Tabela.jsx
 import { useEffect, useMemo, useRef, useState, forwardRef } from "react";
 
 /* ---------------- Tabs ---------------- */
@@ -117,21 +118,38 @@ function calcTable(teams, matches) {
   const rows = teams.map((n) => emptyTeamRow(n));
   for (const m of matches) {
     if (m.ga === "" || m.gb === "") continue;
-    const ga = Number(m.ga), gb = Number(m.gb);
-    const A = rows[m.a], B = rows[m.b];
-    A.gp += ga; A.gc += gb; A.sg = A.gp - A.gc;
-    B.gp += gb; B.gc += ga; B.sg = B.gp - B.gc;
-    if (ga > gb) { A.v++; A.pts += 3; B.d++; }
-    else if (gb > ga) { B.v++; B.pts += 3; A.d++; }
-    else { A.e++; B.e++; A.pts++; B.pts++; }
+    const ga = Number(m.ga),
+      gb = Number(m.gb);
+    const A = rows[m.a],
+      B = rows[m.b];
+    A.gp += ga;
+    A.gc += gb;
+    A.sg = A.gp - A.gc;
+    B.gp += gb;
+    B.gc += ga;
+    B.sg = B.gp - B.gc;
+    if (ga > gb) {
+      A.v++;
+      A.pts += 3;
+      B.d++;
+    } else if (gb > ga) {
+      B.v++;
+      B.pts += 3;
+      A.d++;
+    } else {
+      A.e++;
+      B.e++;
+      A.pts++;
+      B.pts++;
+    }
   }
   return rows;
 }
 function rank(rows) {
   return [...rows].sort((a, b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
-    if (b.v !== a.v) return b.v - a.v;
-    if (b.sg !== a.sg) return b.sg - a.sg;
+    if (b.v !== a.v) return b.v - a.v; // vitórias
+    if (b.sg !== a.sg) return b.sg - a.sg; // saldo
     return a.time.localeCompare(b.time);
   });
 }
@@ -151,7 +169,7 @@ function fixtures4() {
 /* =========================================================
    P Á G I N A
 ========================================================= */
-export default function TabelaCompeticao1() {
+export default function TabelaCompeticao3() {
   const [tab, setTab] = useState("grupos");
   const [isEdit, setIsEdit] = useState(false);
 
@@ -168,12 +186,20 @@ export default function TabelaCompeticao1() {
 
   /* Carrega/Persiste */
   const load = (k, def) => {
-    try { return JSON.parse(localStorage.getItem(k)) ?? def; }
-    catch { return def; }
+    try {
+      return JSON.parse(localStorage.getItem(k)) ?? def;
+    } catch {
+      return def;
+    }
   };
-  const [teams, setTeams] = useState(() => load("c1-teams", teamsInit));
+  const [teams, setTeams] = useState(() => load("c3-teams", teamsInit));
   const [matches, setMatches] = useState(() =>
-    load("c1-matches", { A: fixtures4(), B: fixtures4(), C: fixtures4(), D: fixtures4() })
+    load("c3-matches", {
+      A: fixtures4(),
+      B: fixtures4(),
+      C: fixtures4(),
+      D: fixtures4(),
+    })
   );
 
   const [draftTeams, setDraftTeams] = useState(teams);
@@ -187,8 +213,8 @@ export default function TabelaCompeticao1() {
   const saveAll = () => {
     setTeams(draftTeams);
     setMatches(draftMatches);
-    localStorage.setItem("c1-teams", JSON.stringify(draftTeams));
-    localStorage.setItem("c1-matches", JSON.stringify(draftMatches));
+    localStorage.setItem("c3-teams", JSON.stringify(draftTeams));
+    localStorage.setItem("c3-matches", JSON.stringify(draftMatches));
     setIsEdit(false);
   };
   const cancelAll = () => {
@@ -231,16 +257,26 @@ export default function TabelaCompeticao1() {
     { id: 3, timeA: "—", timeB: "—", ...emptyKO },
     { id: 4, timeA: "—", timeB: "—", ...emptyKO },
   ]);
-  const [semiLeft, setSemiLeft] = useState([{ id: 5, timeA: "—", timeB: "—", ...emptyKO }]);
-  const [semiRight, setSemiRight] = useState([{ id: 6, timeA: "—", timeB: "—", ...emptyKO }]);
-  const [finale, setFinale] = useState([{ id: 7, timeA: "—", timeB: "—", ...emptyKO }]);
+  const [semiLeft, setSemiLeft] = useState([
+    { id: 5, timeA: "—", timeB: "—", ...emptyKO },
+  ]);
+  const [semiRight, setSemiRight] = useState([
+    { id: 6, timeA: "—", timeB: "—", ...emptyKO },
+  ]);
+  const [finale, setFinale] = useState([
+    { id: 7, timeA: "—", timeB: "—", ...emptyKO },
+  ]);
 
   // monta quartas sempre que ranking mudar
   useEffect(() => {
-    const a1 = ranked.A[0]?.time ?? "—", a2 = ranked.A[1]?.time ?? "—";
-    const b1 = ranked.B[0]?.time ?? "—", b2 = ranked.B[1]?.time ?? "—";
-    const c1 = ranked.C[0]?.time ?? "—", c2 = ranked.C[1]?.time ?? "—";
-    const d1 = ranked.D[0]?.time ?? "—", d2 = ranked.D[1]?.time ?? "—";
+    const a1 = ranked.A[0]?.time ?? "—",
+      a2 = ranked.A[1]?.time ?? "—";
+    const b1 = ranked.B[0]?.time ?? "—",
+      b2 = ranked.B[1]?.time ?? "—";
+    const c1 = ranked.C[0]?.time ?? "—",
+      c2 = ranked.C[1]?.time ?? "—";
+    const d1 = ranked.D[0]?.time ?? "—",
+      d2 = ranked.D[1]?.time ?? "—";
     setQuartasLeft((p) => [
       { ...p[0], timeA: a1, timeB: b2 },
       { ...p[1], timeA: b1, timeB: a2 },
@@ -251,7 +287,7 @@ export default function TabelaCompeticao1() {
     ]);
   }, [ranked]);
 
-  // helpers pênaltis (únicos!)
+  // helpers pênaltis
   const pensSum = (arr) =>
     Array.isArray(arr) ? arr.reduce((s, x) => s + (x ? 1 : 0), 0) : null;
   const allFilled = (arr) => Array.isArray(arr) && arr.every((v) => v !== null);
@@ -269,7 +305,10 @@ export default function TabelaCompeticao1() {
     if (!done) return "—";
     if (m.golsA > m.golsB) return m.timeA;
     if (m.golsB > m.golsA) return m.timeB;
-    if (validShootout(m)) return pensSum(m.pA) > pensSum(m.pB) ? m.timeA : m.timeB;
+    // empate → pênaltis
+    if (validShootout(m)) {
+      return pensSum(m.pA) > pensSum(m.pB) ? m.timeA : m.timeB;
+    }
     return "—";
   };
 
@@ -368,12 +407,16 @@ export default function TabelaCompeticao1() {
     const out = Array.isArray(arr) ? [...arr] : [];
     while (out.length < n) out.push(null);
     return out;
-  };
+    };
   const openPensFor = (m) => {
     if (!isEdit) return;
     setPenModal({
       open: true,
-      match: { ...m, pA: ensureLen(m.pA, 5), pB: ensureLen(m.pB, 5) },
+      match: {
+        ...m,
+        pA: ensureLen(m.pA, 5),
+        pB: ensureLen(m.pB, 5),
+      },
     });
   };
   const toggleKick = (team, i) => {
@@ -390,7 +433,14 @@ export default function TabelaCompeticao1() {
   const addSudden = () => {
     setPenModal((pm) => {
       const n = Math.max(pm.match.pA.length, pm.match.pB.length) + 1;
-      return { ...pm, match: { ...pm.match, pA: ensureLen(pm.match.pA, n), pB: ensureLen(pm.match.pB, n) } };
+      return {
+        ...pm,
+        match: {
+          ...pm.match,
+          pA: ensureLen(pm.match.pA, n),
+          pB: ensureLen(pm.match.pB, n),
+        },
+      };
     });
   };
   const removeSudden = () => {
@@ -436,7 +486,11 @@ export default function TabelaCompeticao1() {
             key={i}
             onClick={() => onClick(i)}
             className={`w-10 h-10 rounded-full border flex items-center justify-center text-lg ${
-              v === null ? "bg-white" : v ? "bg-green-600 text-white" : "bg-red-600 text-white"
+              v === null
+                ? "bg-white"
+                : v
+                ? "bg-green-600 text-white"
+                : "bg-red-600 text-white"
             }`}
             title={v === null ? "não cobrado" : v ? "acertou" : "errou"}
           >
@@ -451,16 +505,29 @@ export default function TabelaCompeticao1() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-black">Competição 1 • Tabela</h1>
+        <h1 className="text-2xl font-bold text-black">Competição 3 • Tabela</h1>
 
         {!isEdit ? (
-          <button onClick={() => setIsEdit(true)} className="px-4 py-2 rounded-lg bg-black text-white">
+          <button
+            onClick={() => setIsEdit(true)}
+            className="px-4 py-2 rounded-lg bg-black text-white"
+          >
             Editar
           </button>
         ) : (
           <div className="flex gap-2">
-            <button onClick={saveAll} className="px-4 py-2 rounded-lg bg-green-600 text-white">Salvar</button>
-            <button onClick={cancelAll} className="px-4 py-2 rounded-lg bg-gray-300 text-black">Cancelar</button>
+            <button
+              onClick={saveAll}
+              className="px-4 py-2 rounded-lg bg-green-600 text-white"
+            >
+              Salvar
+            </button>
+            <button
+              onClick={cancelAll}
+              className="px-4 py-2 rounded-lg bg-gray-300 text-black"
+            >
+              Cancelar
+            </button>
           </div>
         )}
       </div>
@@ -480,7 +547,8 @@ export default function TabelaCompeticao1() {
                   <input
                     key={i}
                     className={
-                      "rounded px-2 py-1 " + (isEdit ? "text-black" : "bg-white/70 text-black/70")
+                      "rounded px-2 py-1 " +
+                      (isEdit ? "text-black" : "bg-white/70 text-black/70")
                     }
                     readOnly={!isEdit}
                     value={n}
@@ -537,7 +605,9 @@ export default function TabelaCompeticao1() {
                         }
                         readOnly={!isEdit}
                         value={m.ga}
-                        onChange={(e) => setMatchScore(g, m.id, "ga", e.target.value)}
+                        onChange={(e) =>
+                          setMatchScore(g, m.id, "ga", e.target.value)
+                        }
                       />
                       <span className="mx-1 text-white/80">x</span>
                       <input
@@ -548,7 +618,9 @@ export default function TabelaCompeticao1() {
                         }
                         readOnly={!isEdit}
                         value={m.gb}
-                        onChange={(e) => setMatchScore(g, m.id, "gb", e.target.value)}
+                        onChange={(e) =>
+                          setMatchScore(g, m.id, "gb", e.target.value)
+                        }
                       />
                       <span className="flex-1 text-right truncate">
                         {(isEdit ? draftTeams : teams)[g][m.b]}
@@ -565,7 +637,10 @@ export default function TabelaCompeticao1() {
       {/* ======== CHAVEAMENTO ======== */}
       {tab === "chave" && (
         <div className="min-h-[70vh] flex items-center mt-2">
-          <div ref={containerRef} className="relative w-full overflow-x-auto px-6 md:px-12">
+          <div
+            ref={containerRef}
+            className="relative w-full overflow-x-auto px-6 md:px-12"
+          >
             <div className="mx-auto flex items-center justify-center gap-16 md:gap-24 min-w-[1000px]">
               {/* Quartas - ESQ */}
               <div className="flex flex-col gap-24 pl-2 md:pl-6">
@@ -577,7 +652,11 @@ export default function TabelaCompeticao1() {
                     key={m.id}
                     ref={qlRefs[i]}
                     value={m}
-                    onChange={(v) => setQuartasLeft((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setQuartasLeft((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
                     onOpenPens={() => openPensFor(m)}
                   />
@@ -594,7 +673,11 @@ export default function TabelaCompeticao1() {
                     key={m.id}
                     ref={slRef}
                     value={m}
-                    onChange={(v) => setSemiLeft((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setSemiLeft((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
                     onOpenPens={() => openPensFor(m)}
                   />
@@ -611,7 +694,9 @@ export default function TabelaCompeticao1() {
                     key={m.id}
                     ref={finalRef}
                     value={m}
-                    onChange={(v) => setFinale((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setFinale((arr) => arr.map((x) => (x.id === m.id ? v : x)))
+                    }
                     disabled={!isEdit}
                     onOpenPens={() => openPensFor(m)}
                   />
@@ -628,7 +713,11 @@ export default function TabelaCompeticao1() {
                     key={m.id}
                     ref={srRef}
                     value={m}
-                    onChange={(v) => setSemiRight((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setSemiRight((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
                     onOpenPens={() => openPensFor(m)}
                   />
@@ -645,7 +734,11 @@ export default function TabelaCompeticao1() {
                     key={m.id}
                     ref={qrRefs[i]}
                     value={m}
-                    onChange={(v) => setQuartasRight((arr) => arr.map((x) => (x.id === m.id ? v : x)))}
+                    onChange={(v) =>
+                      setQuartasRight((arr) =>
+                        arr.map((x) => (x.id === m.id ? v : x))
+                      )
+                    }
                     disabled={!isEdit}
                     onOpenPens={() => openPensFor(m)}
                   />
@@ -660,31 +753,84 @@ export default function TabelaCompeticao1() {
               width={containerRef.current?.scrollWidth ?? 1200}
               height={containerRef.current?.scrollHeight ?? 500}
             >
-              <path d={makePath(getCenterRight(qlRefs[0]), getCenterLeft(slRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(qlRefs[1]), getCenterLeft(slRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(slRef), getCenterLeft(finalRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(finalRef), getCenterLeft(srRef))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[0]))} stroke="#111827" strokeWidth="4" fill="none" />
-              <path d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[1]))} stroke="#111827" strokeWidth="4" fill="none" />
+              <path
+                d={makePath(getCenterRight(qlRefs[0]), getCenterLeft(slRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(qlRefs[1]), getCenterLeft(slRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(slRef), getCenterLeft(finalRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(finalRef), getCenterLeft(srRef))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[0]))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[1]))}
+                stroke="#111827"
+                strokeWidth="4"
+                fill="none"
+              />
             </svg>
           </div>
         </div>
       )}
 
       {/* ---- Modal de Pênaltis (com morte súbita) ---- */}
-      <Modal open={penModal.open} onClose={() => setPenModal({ open: false, match: null })}>
+      <Modal
+        open={penModal.open}
+        onClose={() => setPenModal({ open: false, match: null })}
+      >
         {penModal.match && (
           <div>
-            <h3 className="text-lg font-semibold mb-4">Pênaltis — Jogo #{penModal.match.id}</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Pênaltis — Jogo #{penModal.match.id}
+            </h3>
             <div className="space-y-4">
-              <PenRow label={penModal.match.timeA} arr={penModal.match.pA} onClick={(i) => toggleKick("A", i)} />
-              <PenRow label={penModal.match.timeB} arr={penModal.match.pB} onClick={(i) => toggleKick("B", i)} />
+              <PenRow
+                label={penModal.match.timeA}
+                arr={penModal.match.pA}
+                onClick={(i) => toggleKick("A", i)}
+              />
+              <PenRow
+                label={penModal.match.timeB}
+                arr={penModal.match.pB}
+                onClick={(i) => toggleKick("B", i)}
+              />
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 justify-between">
               <div className="flex gap-2">
-                <button onClick={clearPens} className="px-3 py-2 rounded-lg bg-gray-200 text-black">Limpar (volta p/ 5)</button>
-                <button onClick={removeSudden} className="px-3 py-2 rounded-lg bg-gray-200 text-black">Remover última rodada</button>
+                <button
+                  onClick={clearPens}
+                  className="px-3 py-2 rounded-lg bg-gray-200 text-black"
+                >
+                  Limpar (volta p/ 5)
+                </button>
+                <button
+                  onClick={removeSudden}
+                  className="px-3 py-2 rounded-lg bg-gray-200 text-black"
+                >
+                  Remover última rodada
+                </button>
               </div>
 
               <div className="text-sm text-gray-700">
@@ -695,14 +841,31 @@ export default function TabelaCompeticao1() {
                   const filled = allFilled(m.pA) && allFilled(m.pB);
                   if (!filled) return "Marque todas as cobranças desta série.";
                   if (m.pA.length < 5) return "São necessárias pelo menos 5 cobranças.";
-                  if (sA === sB) return <>Empate {sA}×{sB} — adicione <strong>morte súbita</strong>.</>;
-                  return sA > sB ? `Vencedor: ${m.timeA} (${sA}×${sB})` : `Vencedor: ${m.timeB} (${sB}×${sA})`;
+                  if (sA === sB)
+                    return (
+                      <>
+                        Empate {sA}×{sB} — adicione{" "}
+                        <strong>morte súbita</strong>.
+                      </>
+                    );
+                  return sA > sB
+                    ? `Vencedor: ${m.timeA} (${sA}×${sB})`
+                    : `Vencedor: ${m.timeB} (${sB}×${sA})`;
                 })()}
               </div>
 
               <div className="flex gap-2">
-                <button onClick={addSudden} className="px-3 py-2 rounded-lg bg-black text-white">Adicionar morte súbita</button>
-                <button onClick={savePens} disabled={!canSavePens()} className="px-4 py-2 rounded-lg bg-violet-600 text-white disabled:opacity-50">
+                <button
+                  onClick={addSudden}
+                  className="px-3 py-2 rounded-lg bg-black text-white"
+                >
+                  Adicionar morte súbita
+                </button>
+                <button
+                  onClick={savePens}
+                  disabled={!canSavePens()}
+                  className="px-4 py-2 rounded-lg bg-violet-600 text-white disabled:opacity-50"
+                >
                   Salvar pênaltis
                 </button>
               </div>

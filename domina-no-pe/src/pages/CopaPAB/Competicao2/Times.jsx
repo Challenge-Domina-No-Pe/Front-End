@@ -1,5 +1,5 @@
 // src/pages/CopaPAB/Competicao2/Times.jsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /* ----------------- Storage helpers ----------------- */
 const FALLBACK_TEAMS = {
@@ -107,17 +107,33 @@ function TeamBadge({ name, logo }) {
     </div>
   );
 }
+
+/* --- Modal compacto com scroll interno (85vh) --- */
 function Modal({ open, onClose, children }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute inset-x-0 top-10 mx-auto max-w-5xl bg-white rounded-2xl shadow-xl p-6">
-        {children}
+      <div className="absolute inset-x-0 top-10 mx-auto max-w-5xl w-[95vw] bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="max-h-[85vh] flex flex-col">
+          <div className="flex items-center justify-end p-2 border-b">
+            <button
+              onClick={onClose}
+              className="px-3 py-1 rounded-md text-sm bg-gray-100 hover:bg-gray-200"
+              aria-label="Fechar"
+            >
+              Fechar
+            </button>
+          </div>
+          <div className="p-4 md:p-6 overflow-y-auto">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
 function Field({ label, children }) {
   return (
     <label className="block text-sm">
@@ -132,6 +148,87 @@ function readFileAsDataURL(file, cb) {
   const fr = new FileReader();
   fr.onload = () => cb(fr.result);
   fr.readAsDataURL(file);
+}
+
+/* ------- carrossel horizontal (drag + setas + snap) ------- */
+function HScroller({ children, className = "" }) {
+  const ref = useRef(null);
+
+  const scroll = (dx) => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollBy({ left: dx, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let isDown = false;
+    let startX = 0;
+    let startScroll = 0;
+
+    const onDown = (e) => {
+      isDown = true;
+      startX = (e.touches ? e.touches[0].pageX : e.pageX);
+      startScroll = el.scrollLeft;
+      el.classList.add("cursor-grabbing");
+    };
+    const onMove = (e) => {
+      if (!isDown) return;
+      const x = (e.touches ? e.touches[0].pageX : e.pageX);
+      const dx = x - startX;
+      el.scrollLeft = startScroll - dx;
+    };
+    const onUp = () => {
+      isDown = false;
+      el.classList.remove("cursor-grabbing");
+    };
+
+    el.addEventListener("mousedown", onDown);
+    el.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+
+    el.addEventListener("touchstart", onDown, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: true });
+    window.addEventListener("touchend", onUp);
+
+    return () => {
+      el.removeEventListener("mousedown", onDown);
+      el.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      el.removeEventListener("touchstart", onDown);
+      el.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, []);
+
+  return (
+    <div className={"relative " + className}>
+      <button
+        onClick={() => scroll(-380)}
+        className="hidden md:flex absolute left-0 -translate-x-1 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-9 h-9 rounded-full bg-black/60 text-white hover:bg-black"
+        aria-label="Anterior"
+      >
+        ◀
+      </button>
+      <button
+        onClick={() => scroll(380)}
+        className="hidden md:flex absolute right-0 translate-x-1 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-9 h-9 rounded-full bg-black/60 text-white hover:bg-black"
+        aria-label="Próximo"
+      >
+        ▶
+      </button>
+
+      <div
+        ref={ref}
+        className="overflow-x-auto scroll-smooth snap-x snap-mandatory flex gap-4 pr-2 cursor-grab"
+        style={{ scrollbarWidth: "auto" }}
+      >
+        {children}
+      </div>
+    </div>
+  );
 }
 
 /* ----------------- Página ----------------- */
@@ -149,14 +246,14 @@ export default function TimesCompeticao2() {
   const all = useMemo(() => {
     const out = [];
     ["A", "B", "C", "D"].forEach((g) => {
-      teams[g].forEach((name, idx) => out.push({ group: g, idx, name, logo: logos[name] || "" }));
+      (teams[g] || []).forEach((name, idx) => out.push({ group: g, idx, name, logo: logos[name] || "" }));
     });
     return out;
   }, [teams, logos]);
 
   const filtered = all.filter((t) => {
     const okGroup = filter === "ALL" || t.group === filter;
-    const okText = t.name.toLowerCase().includes(q.toLowerCase().trim());
+    const okText = (t.name || "").toLowerCase().includes(q.toLowerCase().trim());
     return okGroup && okText;
   });
 
@@ -192,9 +289,9 @@ export default function TimesCompeticao2() {
     setError("");
     const g = form.group;
     const names = [...teams[g]];
-    // 1) tentar substituir placeholder "Time X" ou "—"
+    // 1) placeholder "Time X" ou "—"
     let idx = names.findIndex((n) => /^time\s*\d+$/i.test(n) || n === "—");
-    // 2) se nenhum placeholder, só deixa se o grupo AINDA não começou (todos placares vazios)
+    // 2) se nenhum placeholder e grupo já começou, bloqueia
     const groupMatches = matches[g];
     const groupStarted = groupMatches.some((m) => m.ga !== "" || m.gb !== "");
     if (idx === -1) {
@@ -320,7 +417,7 @@ export default function TimesCompeticao2() {
     setLogos(newLogos);
 
     if (openTeam && openTeam.group === g && teams[g][openTeam.idx] === oldName) {
-      // mantém o modal aberto; `sel` se recalcula pelo índice
+      // continua no mesmo índice
     }
 
     setRenameForm((f) => ({ ...f, newName: "" }));
@@ -376,7 +473,9 @@ export default function TimesCompeticao2() {
     setRosters((r) => ({
       ...r,
       [key]: (r[key] || []).map((pl) =>
-        pl.id === pid ? { ...pl, [field]: field === "gols" || field === "assistencias" ? Number(value || 0) : value } : pl
+        pl.id === pid
+          ? { ...pl, [field]: field === "gols" || field === "assistencias" ? Number(value || 0) : value }
+          : pl
       ),
     }));
   };
@@ -745,7 +844,7 @@ export default function TimesCompeticao2() {
             </div>
 
             {/* elenco */}
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-3 flex items-center justify-between">
               <h3 className="font-semibold">Elenco</h3>
               <button
                 className="px-3 py-2 rounded-lg bg-black text-white text-sm"
@@ -761,19 +860,22 @@ export default function TimesCompeticao2() {
               </div>
             )}
 
-            {/* Cartinhas estilo FIFA */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Cartas em CARROSSEL */}
+            <HScroller className="mb-2">
               {sel.roster.map((p) => (
-                <div key={p.id} className="rounded-2xl border p-4 bg-gray-50">
-                  <div className="flex gap-4">
-                    {/* Foto grande */}
-                    <div className="relative">
+                <div
+                  key={p.id}
+                  className="snap-start w=[360px] min-w-[360px] shrink-0 rounded-2xl border bg-gray-50 overflow-hidden"
+                >
+                  <div className="p-3 flex items-start gap-3">
+                    {/* Foto mais compacta */}
+                    <div className="relative shrink-0">
                       <img
-                        src={p.foto || "https://via.placeholder.com/220x280"}
+                        src={p.foto || "https://via.placeholder.com/160x200"}
                         alt={p.nome || "Jogadora"}
-                        className="w-[150px] h-[200px] md:w-[180px] md:h-[240px] rounded-xl object-cover bg-gray-100"
+                        className="w-[120px] h-[160px] rounded-xl object-cover bg-gray-100"
                       />
-                      <label className="absolute bottom-2 left-2 bg-black/70 text-white text-xs rounded px-2 py-1 cursor-pointer">
+                      <label className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] rounded px-2 py-1 cursor-pointer">
                         Upload
                         <input
                           type="file"
@@ -784,19 +886,19 @@ export default function TimesCompeticao2() {
                       </label>
                     </div>
 
-                    {/* Infos principais */}
-                    <div className="flex-1 space-y-3">
+                    {/* Infos principais compactas */}
+                    <div className="flex-1 space-y-2">
                       <div className="grid grid-cols-2 gap-2">
                         <Field label="Nome">
                           <input
-                            className="w-full rounded-lg border px-2 py-1"
+                            className="w-full rounded-lg border px-2 py-1 text-sm"
                             value={p.nome}
                             onChange={(e) => updatePlayer(p.id, "nome", e.target.value)}
                           />
                         </Field>
                         <Field label="Número">
                           <input
-                            className="w-full rounded-lg border px-2 py-1"
+                            className="w-full rounded-lg border px-2 py-1 text-sm"
                             value={p.numero}
                             onChange={(e) => updatePlayer(p.id, "numero", e.target.value)}
                           />
@@ -804,25 +906,23 @@ export default function TimesCompeticao2() {
                       </div>
 
                       <Field label="Posição">
-                        <div className="flex items-center gap-2">
-                          <input
-                            className="rounded-lg border px-2 py-1 flex-1"
-                            value={p.posicao}
-                            onChange={(e) => updatePlayer(p.id, "posicao", e.target.value)}
-                            placeholder="Ex.: MEI"
-                          />
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {POS_SHORTCUTS.map((pos) => (
+                        <input
+                          className="rounded-lg border px-2 py-1 w-full text-sm"
+                          value={p.posicao}
+                          onChange={(e) => updatePlayer(p.id, "posicao", e.target.value)}
+                          placeholder="Ex.: MEI"
+                        />
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {["GOL","ZAG","LAT","VOL","MEI","PON","ATA"].map((pos) => (
                             <button
                               key={pos}
                               onClick={() => updatePlayer(p.id, "posicao", pos)}
-                              className={`px-2 py-1 rounded-md text-xs font-semibold border ${
+                              type="button"
+                              className={`px-2 py-1 rounded-md text-[11px] font-semibold border ${
                                 p.posicao === pos
                                   ? "bg-black text-white border-black"
                                   : "bg-white text-black border-black hover:bg-black/10"
                               }`}
-                              type="button"
                             >
                               {pos}
                             </button>
@@ -834,33 +934,33 @@ export default function TimesCompeticao2() {
                         <Field label="Gols">
                           <input
                             type="number"
-                            className="w-full rounded-lg border px-2 py-1"
+                            className="w-full rounded-lg border px-2 py-1 text-sm"
                             value={p.gols ?? 0}
                             onChange={(e) => updatePlayer(p.id, "gols", e.target.value)}
                           />
                         </Field>
-                        <Field label="Assistências">
+                        <Field label="Assist.">
                           <input
                             type="number"
-                            className="w-full rounded-lg border px-2 py-1"
+                            className="w-full rounded-lg border px-2 py-1 text-sm"
                             value={p.assistencias ?? 0}
                             onChange={(e) => updatePlayer(p.id, "assistencias", e.target.value)}
                           />
                         </Field>
                       </div>
 
-                      <Field label="Foto (URL alternativa)">
+                      <Field label="Foto (URL)">
                         <input
-                          className="w-full rounded-lg border px-2 py-1"
+                          className="w-full rounded-lg border px-2 py-1 text-sm"
                           value={p.foto}
                           onChange={(e) => updatePlayer(p.id, "foto", e.target.value)}
-                          placeholder="https://… (opcional se fez upload)"
+                          placeholder="https://…"
                         />
                       </Field>
 
-                      <Field label="Bio (opcional)">
+                      <Field label="Bio">
                         <textarea
-                          className="w-full rounded-lg border px-2 py-1"
+                          className="w-full rounded-lg border px-2 py-1 text-sm"
                           rows={2}
                           value={p.bio}
                           onChange={(e) => updatePlayer(p.id, "bio", e.target.value)}
@@ -879,6 +979,9 @@ export default function TimesCompeticao2() {
                   </div>
                 </div>
               ))}
+            </HScroller>
+            <div className="text-xs text-gray-500 mt-1">
+              Dica: arraste para o lado, use a barra de rolagem ou as setas (desktop).
             </div>
 
             {/* partidas do time no grupo */}
