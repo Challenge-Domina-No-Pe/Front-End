@@ -1,6 +1,6 @@
 import NewsCard from "../components/NewsCard";
 import Footer from "../components/Footer";
-import logo from "../assets/Dominalogo.png";
+import logo from "../assets/Passalogo.png";
 
 const Home = () => {
   const newsItems = [
@@ -33,7 +33,7 @@ const Home = () => {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
         <img src={logo} alt="Logo" className="w-24 h-24 sm:w-20 sm:h-20 object-contain" />
         <h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
-          Bem-vindo ao Domina no Pé
+          Bem-vindo ao Passa a Bola
         </h1>
       </div>
 
