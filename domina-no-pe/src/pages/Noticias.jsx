@@ -1,10 +1,11 @@
 import NewsCard from "../components/NewsCard";
+import Not1 from "../assets/Noticias/Noticia1.png";
 
 const Noticias = () => {
   const allNews = [
     {
       id: 1,
-      imageSrc: "https://via.placeholder.com/600x400?text=Notícia+1",
+      imageSrc: {Not1},
       title: "Título da Notícia Completa 1",
       description: "Esta é a descrição detalhada da primeira notícia. Ela fala sobre o último jogo e as novidades do time. Aqui o texto pode ser um pouco mais longo para mostrar mais detalhes.",
       link: "#"

@@ -1,69 +1,64 @@
-import NewsCard from "../components/NewsCard";
-import Footer from "../components/Footer";
-import logo from "../assets/Passalogo.png";
+import logo from "../assets/Passalogo.png"; 
+import Footer from "../components/Footer";  
+import yt from "../assets/yt.jpg"; 
+import insta from "../assets/insta.jpg"; 
 
-const Home = () => {
-  const newsItems = [
-    {
-      id: 1,
-      imageSrc: "https://via.placeholder.com/400x200",
-      title: "Título da Notícia 1",
-      description: "Esta é a descrição da primeira notícia. Ela é um pouco longa para demonstrar o efeito de 'clamp'.",
-      link: "#"
-    },
-    {
-      id: 2,
-      imageSrc: "https://via.placeholder.com/400x200",
-      title: "Título da Notícia 2",
-      description: "Descrição da segunda notícia.",
-      link: "#"
-    },
-    {
-      id: 3,
-      imageSrc: "https://via.placeholder.com/400x200",
-      title: "Título da Notícia 3",
-      description: "Mais uma notícia de exemplo para preencher o espaço e ver o layout.",
-      link: "#"
-    }
-  ];
-
+export default function Home() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-7xl mx-auto">
-      {/* Cabeçalho */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-        <img src={logo} alt="Logo" className="w-24 h-24 sm:w-20 sm:h-20 object-contain" />
-        <h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">
-          Bem-vindo ao Passa a Bola
-        </h1>
-      </div>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {/* Header */}
+      <header className="flex items-center justify-center bg-white shadow-md py-4">
+        <img src={logo} alt="Passa a Bola" className="w-16 h-16 mr-3" />
+        <h1 className="text-2xl font-bold text-purple-800">PASSA A BOLA</h1>
+      </header>
 
-      <p className="text-lg text-gray-700 mb-8 text-center sm:text-left">
-        A sua plataforma de conteúdo sobre futebol feminino. Fique por dentro das últimas notícias,
-        eventos e peneiras do esporte.
-      </p>
+      {/* Conteúdo */}
+      <main className="flex flex-1 items-center justify-center px-6 md:px-12 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start max-w-6xl w-full text-center">
+          {/* Card YouTube */}
+          <a
+            href="https://www.youtube.com/@passabola"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center hover:scale-105 transition-transform duration-300"
+          >
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 ">
+              Vem nos conhecer
+            </h2>
+            <img
+              src={yt}
+              alt="Canal do Passa a Bola no YouTube"
+              className="rounded-lg shadow-md w-full max-w-md mb-2 w-100 h-100"
+            />
+            <p className="text-gray-700">
+              Vem ver nosso canal do YouTube
+            </p>
+          </a>
 
-      {/* Título da seção */}
-      <h2 className="text-3xl font-semibold mb-6 mt-12 text-center sm:text-left">
-        Últimas Notícias
-      </h2>
+          {/* Card Instagram */}
+          <a
+            href="https://instagram.com/passaabola"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center hover:scale-105 transition-transform duration-300"
+          >
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Nosso Insta
+            </h2>
+            <img
+              src={insta}
+              alt="Instagram do Passa a Bola"
+              className="rounded-lg shadow-md w-full max-w-md mb-2 w-100 h-100"
+            />
+            <p className="text-gray-700">
+              Nosso Instagram tem as últimas notícias do mundo da bola feminina
+            </p>
+          </a>
+        </div>
+      </main>
 
-      {/* Grid de notícias */}
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {newsItems.map(item => (
-          <NewsCard
-            key={item.id}
-            imageSrc={item.imageSrc}
-            title={item.title}
-            description={item.description}
-            link={item.link}
-          />
-        ))}
-      </div>
-
-      {/* Footer */}
+      {/* Footer pronto */}
       <Footer />
     </div>
   );
-};
-
-export default Home;
+}
