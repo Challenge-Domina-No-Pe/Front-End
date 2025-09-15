@@ -115,7 +115,7 @@ export default function Sidebar() {
         ref={sidebarRef}
   onMouseEnter={() => setIsHovered(true)}
   onMouseLeave={() => setIsHovered(false)}
-  className={`flex-shrink-0 bg-[#7c3fb9] text-white flex flex-col min-h-screen z-40 transition-all duration-300
+  className={`flex-shrink-0 bg-[#7c3fb9] text-white flex flex-col min-h-full z-40 transition-all duration-300
     ${isMobileOpen ? "absolute inset-0 w-64 top-0" : isPinned ? "w-60" : "w-16"}`}
 >
   {/* Desktop Header */}
