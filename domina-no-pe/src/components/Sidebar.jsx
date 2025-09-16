@@ -38,6 +38,9 @@ const TrophyIcon = () => (
 
 );
 
+const ClipboardIcon = () => (
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clipboard-list-icon lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>);
+
 const SoccerBallIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe-icon lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
 );
@@ -165,7 +168,7 @@ export default function Sidebar() {
                       {openCompetitions[comp.id] && (
                         <div className="ml-4 flex flex-col gap-2 mt-1">
                           <NavLink to={`/copa-pab/competicao${comp.id}/tabela`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
-                            <SoccerBallIcon /> Tabela
+                            <ClipboardIcon /> Tabela
                           </NavLink>
                           <NavLink to={`/copa-pab/competicao${comp.id}/times`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
                             <SoccerBallIcon /> Times

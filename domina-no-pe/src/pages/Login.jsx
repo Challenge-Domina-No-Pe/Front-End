@@ -1,4 +1,4 @@
-import logo from "../assets/Dominalogo.png";
+import logo from "../assets/Passalogo.png";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {

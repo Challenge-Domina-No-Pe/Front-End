@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
-import logo from "../assets/Dominalogo.png";
+import logo from "../assets/Passalogo.png";
 
 export default function Escolinhas() {
   const [location, setLocation] = useState("");

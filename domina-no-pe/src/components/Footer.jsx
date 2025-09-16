@@ -1,4 +1,4 @@
-import logo from "../assets/Dominalogo.png";
+import logo from "../assets/Passalogo.png";
 
 export default function Footer() {
   return (
@@ -12,7 +12,7 @@ export default function Footer() {
             alt="Passa a Bola"
             className="w-8 h-8"
           />
-          <span className="font-semibold text-gray-700">Domina no Pé</span>
+          <span className="font-semibold text-gray-700">Passa a Bola</span>
         </div>
 
         {/* Links extras */}
@@ -30,7 +30,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="mt-4 md:mt-0">
-          © {new Date().getFullYear()} Domina no pé. Todos os direitos reservados.
+          © {new Date().getFullYear()} Passa a bola. Todos os direitos reservados.
         </div>
       </div>
     </footer>
