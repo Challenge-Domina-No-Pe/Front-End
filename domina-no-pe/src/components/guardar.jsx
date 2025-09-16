@@ -71,3 +71,64 @@ const ContactIcon = () => (
 
 );
 const LogoutIcon = () => ( <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/> <path d="M16 17l5-5-5-5"/> <path d="M21 12H9"/> </svg> );
+
+
+<div className="overflow-x-auto rounded-2xl border">
+        <table className="min-w-[800px] w-full">
+          <thead className="bg-black text-white text-sm">
+            <tr>
+              <th className="text-left px-4 py-3 w-16">#</th>
+              <th className="text-left px-4 py-3">Jogadora</th>
+              <th className="text-left px-4 py-3">Time</th>
+              <th className="text-center px-4 py-3">G</th>
+              <th className="text-center px-4 py-3">A</th>
+              <th className="text-center px-4 py-3">G+A</th>
+              <th className="text-center px-4 py-3">Grupo</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white">
+            {visible.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                  Nenhum dado para exibir. Cadastre jogadoras e preencha gols/assistências na página de Times.
+                </td>
+              </tr>
+            )}
+
+            {visible.map((p, idx) => (
+              <tr
+                key={p.id}
+                className="border-t hover:bg-gray-50"
+              >
+                <td className="px-4 py-3 font-semibold">{idx + 1}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={p.foto || "https://via.placeholder.com/64"}
+                      alt={p.nome}
+                      className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                      loading="lazy"
+                    />
+                    <div>
+                      <div className="font-medium">{p.nome}</div>
+                      <div className="text-xs text-gray-500">
+                        {p.posicao ? `${p.posicao}` : ""} {p.numero ? `• #${p.numero}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <TeamBadge name={p.team} logo={p.teamLogo} />
+                    <span className="truncate">{p.team}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-center font-semibold">{p.gols}</td>
+                <td className="px-4 py-3 text-center font-semibold">{p.assist}</td>
+                <td className="px-4 py-3 text-center font-semibold">{p.ga}</td>
+                <td className="px-4 py-3 text-center">{p.group}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>

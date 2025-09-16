@@ -1,33 +1,38 @@
 import NewsCard from "../components/NewsCard";
+import Not1 from "../assets/noticias/Noticia1.png";
+import Not2 from "../assets/noticias/Noticia2.png";
+import Not3 from "../assets/noticias/Noticia3.png";
+import Not4 from "../assets/noticias/Noticia4.png";
 
 const Noticias = () => {
   const allNews = [
     {
       id: 1,
-      imageSrc: "https://via.placeholder.com/600x400?text=Notícia+1",
-      title: "Título da Notícia Completa 1",
-      description: "Esta é a descrição detalhada da primeira notícia. Ela fala sobre o último jogo e as novidades do time. Aqui o texto pode ser um pouco mais longo para mostrar mais detalhes.",
-      link: "#"
+      imageSrc: Not1,
+      title: "Corinthias é Campeão",
+      description: "Corinthians fica com o título do Brasileirão pela sétima vez 🏆🏆",
+      link: "https://www.instagram.com/p/DOlpqrWjQPU/"
     },
     {
       id: 2,
-      imageSrc: "https://via.placeholder.com/600x400?text=Notícia+2",
-      title: "Título da Notícia Completa 2",
-      description: "Conteúdo sobre a preparação do time para o próximo campeonato. A matéria inclui entrevistas com as jogadoras e o técnico, e fotos exclusivas.",
-      link: "#"
+      imageSrc: Not2,
+      title: "Eternizada",
+      description: "Homenagem pra Alessia Russo 🤩🤩",
+      link: "https://www.instagram.com/p/DOg8tfEjT0_/?img_index=1"
     },
     {
       id: 3,
-      imageSrc: "https://via.placeholder.com/600x400?text=Notícia+3",
-      description: "A descrição dessa notícia é sobre a nova iniciativa de escolinhas de futebol feminino para crianças e adolescentes, incentivando a próxima geração de jogadoras.",
-      link: "#"
+      imageSrc: Not3,
+      title: "Final descidida",
+      description: "FINALISTAS 🏆",
+      link: "https://www.instagram.com/p/DOBlhPEDWkd/"
     },
     {
       id: 4,
-      imageSrc: "https://via.placeholder.com/600x400?text=Notícia+4",
-      title: "Título da Notícia Completa 4",
-      description: "A equipe de analistas do Domina no Pé fez uma análise tática do último jogo. Confira os principais pontos e o que esperar do próximo confronto.",
-      link: "#"
+      imageSrc: Not4,
+      title: "Historia fez Historia",
+      description: "O Brasileirão Feminino está chegando ao fim, mas vale relembrar a campanha especial que o Bahia fez nessa edição 👏",
+      link: "https://www.instagram.com/p/DN8SQlojbGN/?img_index=1"
     }
   ];
 

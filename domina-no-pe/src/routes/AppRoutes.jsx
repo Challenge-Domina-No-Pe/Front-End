@@ -12,14 +12,12 @@ import CriarConta from "../pages/CriarConta";
 import Noticias from "../pages/Noticias";
 import Peneiras from "../pages/Peneiras";
 import Escolinhas from "../pages/Escolinhas";
-import SobreNos from "../pages/Sobrenos";        // atenção ao nome do arquivo
+import SobreNos from "../pages/Sobrenos";        
 import Contato from "../pages/Contato";
 
 // Copa PAB (nível 1)
 import CopaPabHome from "../pages/CopaPAB/CopaPabHome";
-import Jogos from "../pages/CopaPAB/jogos";      // arquivo é 'jogos.jsx' (minúsculo)
-import Estatisticas from "../pages/CopaPAB/Estatisticas";
-import Fotos from "../pages/CopaPAB/Fotos";
+
 
 // Competição 1
 import TabelaCompeticao1 from "../pages/CopaPAB/Competicao1/Tabela";
@@ -66,9 +64,7 @@ export const router = createBrowserRouter([
         element: <CopaPabLayout />,
         children: [
           { index: true, element: <CopaPabHome /> },
-          { path: "jogos", element: <Jogos /> },
-          { path: "estatisticas", element: <Estatisticas /> },
-          { path: "fotos", element: <Fotos /> },
+          
 
           // Competição 1
           {
