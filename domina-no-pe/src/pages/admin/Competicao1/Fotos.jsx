@@ -1,3 +1,4 @@
+// src/pages/CopaPAB/Competicao1/Fotos.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
 /* ----------------- Helpers de storage ----------------- */
@@ -60,11 +61,11 @@ function Modal({ open, onClose, children }) {
 }
 
 /* ----------------- Página ----------------- */
-export default function FotosCompeticao3() {
+export default function FotosCompeticao1() {
   // Carrega times da tabela (se já existirem) ou fallback
-  const [teams, setTeams] = useState(() => load("c3-teams", FALLBACK_TEAMS));
+  const [teams, setTeams] = useState(() => load("c1-teams", FALLBACK_TEAMS));
   // Álbuns por time
-  const [photos, setPhotos] = useState(() => load("c3-photos", FALLBACK_PHOTOS));
+  const [photos, setPhotos] = useState(() => load("c1-photos", FALLBACK_PHOTOS));
 
   const [groupFilter, setGroupFilter] = useState("ALL"); // ALL | A | B | C | D
   const [q, setQ] = useState(""); // busca por nome do time
@@ -73,10 +74,10 @@ export default function FotosCompeticao3() {
   const dropRef = useRef(null);
 
   // Salva mudanças no storage
-  useEffect(() => save("c3-photos", photos), [photos]);
+  useEffect(() => save("c1-photos", photos), [photos]);
 
   // Reage à mudança externa dos times (caso você cadastre via outra página)
-  useEffect(() => save("c3-teams", teams), [teams]);
+  useEffect(() => save("c1-teams", teams), [teams]);
 
   // Lista plana de times (com grupo)
   const teamList = useMemo(() => {
@@ -202,7 +203,9 @@ export default function FotosCompeticao3() {
   const openLightbox = (idx) => setLightbox({ idx });
   const closeLightbox = () => setLightbox(null);
   const goPrev = () =>
-    setLightbox((l) => (l ? { idx: Math.max(0, l.idx - 1) } : null));
+    setLightbox((l) =>
+      l ? { idx: Math.max(0, l.idx - 1) } : null
+    );
   const goNext = () =>
     setLightbox((l) =>
       l ? { idx: Math.min(selectedAlbum.length - 1, l.idx + 1) } : null
@@ -211,7 +214,7 @@ export default function FotosCompeticao3() {
   /* ----------------- UI ----------------- */
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-black mb-4">Fotos • Competição 3</h1>
+      <h1 className="text-2xl font-bold text-black mb-4">Fotos • Competição 1</h1>
 
       {/* filtros topo */}
       <div className="flex flex-wrap items-center gap-3 mb-4">

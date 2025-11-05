@@ -1,4 +1,4 @@
-// src/pages/CopaPAB/Competicao2/Tabela.jsx
+// src/pages/CopaPAB/Competicao1/Tabela.jsx
 import { useEffect, useMemo, useRef, useState, forwardRef } from "react";
 
 function Tabs({ tab, setTab }) {
@@ -8,16 +8,10 @@ function Tabs({ tab, setTab }) {
   const off = "bg-white text-black border-black hover:bg-black/10";
   return (
     <div className="flex gap-2 mb-6">
-      <button
-        className={`${base} ${tab === "grupos" ? active : off}`}
-        onClick={() => setTab("grupos")}
-      >
+      <button className={`${base} ${tab === "grupos" ? active : off}`} onClick={() => setTab("grupos")}>
         Grupos
       </button>
-      <button
-        className={`${base} ${tab === "chave" ? active : off}`}
-        onClick={() => setTab("chave")}
-      >
+      <button className={`${base} ${tab === "chave" ? active : off}`} onClick={() => setTab("chave")}>
         Chaveamento
       </button>
     </div>
@@ -67,9 +61,7 @@ const MatchCard = forwardRef(function MatchCard(
       className="w-64 bg-gradient-to-b from-violet-600 to-purple-700 text-white rounded-2xl shadow-md p-4"
     >
       <div className="flex items-center justify-between gap-3">
-        <span className={`truncate ${winA ? "font-bold" : ""}`}>
-          {value.timeA}
-        </span>
+        <span className={`truncate ${winA ? "font-bold" : ""}`}>{value.timeA}</span>
         <input
           type="number"
           value={value.golsA}
@@ -79,9 +71,7 @@ const MatchCard = forwardRef(function MatchCard(
         />
       </div>
       <div className="flex items-center justify-between gap-3 mt-3">
-        <span className={`truncate ${winB ? "font-bold" : ""}`}>
-          {value.timeB}
-        </span>
+        <span className={`truncate ${winB ? "font-bold" : ""}`}>{value.timeB}</span>
         <input
           type="number"
           value={value.golsB}
@@ -95,9 +85,7 @@ const MatchCard = forwardRef(function MatchCard(
         {tie ? (
           <div className="flex items-center justify-between">
             {hasPens ? (
-              <span className="font-semibold">
-                Pênaltis: {pA}–{pB}
-              </span>
+              <span className="font-semibold">Pênaltis: {pA}–{pB}</span>
             ) : (
               <span className="opacity-90">Empate — definir pênaltis</span>
             )}
@@ -111,9 +99,7 @@ const MatchCard = forwardRef(function MatchCard(
             )}
           </div>
         ) : hasPens ? (
-          <span className="font-semibold">
-            Pênaltis: {pA}–{pB}
-          </span>
+          <span className="font-semibold">Pênaltis: {pA}–{pB}</span>
         ) : null}
       </div>
     </div>
@@ -127,30 +113,13 @@ function calcTable(teams, matches) {
   const rows = teams.map((n) => emptyTeamRow(n));
   for (const m of matches) {
     if (m.ga === "" || m.gb === "") continue;
-    const ga = Number(m.ga),
-      gb = Number(m.gb);
-    const A = rows[m.a],
-      B = rows[m.b];
-    A.gp += ga;
-    A.gc += gb;
-    A.sg = A.gp - A.gc;
-    B.gp += gb;
-    B.gc += ga;
-    B.sg = B.gp - B.gc;
-    if (ga > gb) {
-      A.v++;
-      A.pts += 3;
-      B.d++;
-    } else if (gb > ga) {
-      B.v++;
-      B.pts += 3;
-      A.d++;
-    } else {
-      A.e++;
-      B.e++;
-      A.pts++;
-      B.pts++;
-    }
+    const ga = Number(m.ga), gb = Number(m.gb);
+    const A = rows[m.a], B = rows[m.b];
+    A.gp += ga; A.gc += gb; A.sg = A.gp - A.gc;
+    B.gp += gb; B.gc += ga; B.sg = B.gp - B.gc;
+    if (ga > gb) { A.v++; A.pts += 3; B.d++; }
+    else if (gb > ga) { B.v++; B.pts += 3; A.d++; }
+    else { A.e++; B.e++; A.pts++; B.pts++; }
   }
   return rows;
 }
@@ -173,13 +142,11 @@ function fixtures4() {
   ];
 }
 
-export default function TabelaCompeticao2() {
+export default function TabelaCompeticao1() {
   const [tab, setTab] = useState("grupos");
   const [isEdit, setIsEdit] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(max-width: 768px)").matches
-      : false
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)").matches : false
   );
 
   useEffect(() => {
@@ -207,9 +174,9 @@ export default function TabelaCompeticao2() {
       return def;
     }
   };
-  const [teams, setTeams] = useState(() => load("c2-teams", teamsInit));
+  const [teams, setTeams] = useState(() => load("c1-teams", teamsInit));
   const [matches, setMatches] = useState(() =>
-    load("c2-matches", {
+    load("c1-matches", {
       A: fixtures4(),
       B: fixtures4(),
       C: fixtures4(),
@@ -228,8 +195,8 @@ export default function TabelaCompeticao2() {
   const saveAll = () => {
     setTeams(draftTeams);
     setMatches(draftMatches);
-    localStorage.setItem("c2-teams", JSON.stringify(draftTeams));
-    localStorage.setItem("c2-matches", JSON.stringify(draftMatches));
+    localStorage.setItem("c1-teams", JSON.stringify(draftTeams));
+    localStorage.setItem("c1-matches", JSON.stringify(draftMatches));
     setIsEdit(false);
   };
   const cancelAll = () => {
@@ -270,25 +237,15 @@ export default function TabelaCompeticao2() {
     { id: 3, timeA: "—", timeB: "—", ...emptyKO },
     { id: 4, timeA: "—", timeB: "—", ...emptyKO },
   ]);
-  const [semiLeft, setSemiLeft] = useState([
-    { id: 5, timeA: "—", timeB: "—", ...emptyKO },
-  ]);
-  const [semiRight, setSemiRight] = useState([
-    { id: 6, timeA: "—", timeB: "—", ...emptyKO },
-  ]);
-  const [finale, setFinale] = useState([
-    { id: 7, timeA: "—", timeB: "—", ...emptyKO },
-  ]);
+  const [semiLeft, setSemiLeft] = useState([{ id: 5, timeA: "—", timeB: "—", ...emptyKO }]);
+  const [semiRight, setSemiRight] = useState([{ id: 6, timeA: "—", timeB: "—", ...emptyKO }]);
+  const [finale, setFinale] = useState([{ id: 7, timeA: "—", timeB: "—", ...emptyKO }]);
 
   useEffect(() => {
-    const a1 = ranked.A[0]?.time ?? "—",
-      a2 = ranked.A[1]?.time ?? "—";
-    const b1 = ranked.B[0]?.time ?? "—",
-      b2 = ranked.B[1]?.time ?? "—";
-    const c1 = ranked.C[0]?.time ?? "—",
-      c2 = ranked.C[1]?.time ?? "—";
-    const d1 = ranked.D[0]?.time ?? "—",
-      d2 = ranked.D[1]?.time ?? "—";
+    const a1 = ranked.A[0]?.time ?? "—", a2 = ranked.A[1]?.time ?? "—";
+    const b1 = ranked.B[0]?.time ?? "—", b2 = ranked.B[1]?.time ?? "—";
+    const c1 = ranked.C[0]?.time ?? "—", c2 = ranked.C[1]?.time ?? "—";
+    const d1 = ranked.D[0]?.time ?? "—", d2 = ranked.D[1]?.time ?? "—";
     setQuartasLeft((p) => [
       { ...p[0], timeA: a1, timeB: b2 },
       { ...p[1], timeA: b1, timeB: a2 },
@@ -330,9 +287,7 @@ export default function TabelaCompeticao2() {
   useEffect(() => {
     const wTop = winnerOf(quartasRight[0]);
     const wBot = winnerOf(quartasRight[1]);
-    setSemiRight((prev) =>
-      prev.map((s) => ({ ...s, timeA: wTop, timeB: wBot }))
-    );
+    setSemiRight((prev) => prev.map((s) => ({ ...s, timeA: wTop, timeB: wBot })));
   }, [quartasRight]);
   useEffect(() => {
     const wl = winnerOf(semiLeft[0]);
@@ -389,10 +344,7 @@ export default function TabelaCompeticao2() {
   }, [tab, quartasLeft, quartasRight, semiLeft, semiRight, finale, isMobile]);
 
   const setTeamName = (g, idx, name) =>
-    setDraftTeams((t) => ({
-      ...t,
-      [g]: t[g].map((n, i) => (i === idx ? name : n)),
-    }));
+    setDraftTeams((t) => ({ ...t, [g]: t[g].map((n, i) => (i === idx ? name : n)) }));
   const setMatchScore = (g, id, side, value) =>
     setDraftMatches((mm) => ({
       ...mm,
@@ -457,10 +409,7 @@ export default function TabelaCompeticao2() {
       const len = pm.match.pA.length;
       if (len <= 5) return pm;
       const trim = (arr) => arr.slice(0, len - 1);
-      return {
-        ...pm,
-        match: { ...pm.match, pA: trim(pm.match.pA), pB: trim(pm.match.pB) },
-      };
+      return { ...pm, match: { ...pm.match, pA: trim(pm.match.pA), pB: trim(pm.match.pB) } };
     });
   };
   const clearPens = () => {
@@ -498,11 +447,7 @@ export default function TabelaCompeticao2() {
             key={i}
             onClick={() => onClick(i)}
             className={`w-10 h-10 rounded-full border flex items-center justify-center text-lg ${
-              v === null
-                ? "bg-white"
-                : v
-                ? "bg-green-600 text-white"
-                : "bg-red-600 text-white"
+              v === null ? "bg-white" : v ? "bg-green-600 text-white" : "bg-red-600 text-white"
             }`}
             title={v === null ? "não cobrado" : v ? "acertou" : "errou"}
           >
@@ -513,15 +458,15 @@ export default function TabelaCompeticao2() {
     </div>
   );
 
-  // --- MOBILE FUNIL (igual ao mock, com “T” no topo e no fundo) ---
+  // --- MOBILE FUNIL (igual ao mock) ---
   const VerticalBracket = () => {
     const vContainerRef = useRef(null);
 
     const qTopLRef = useRef(null);
     const qTopRRef = useRef(null);
-    const sTopRef = useRef(null);
+    const sTopRef  = useRef(null);
     const finalRefV = useRef(null);
-    const sBotRef = useRef(null);
+    const sBotRef  = useRef(null);
     const qBotLRef = useRef(null);
     const qBotRRef = useRef(null);
 
@@ -575,19 +520,13 @@ export default function TabelaCompeticao2() {
     return (
       <div ref={vContainerRef} className="relative w-full px-2">
         <div className="grid grid-cols-2 gap-y-8 gap-x-6 max-w-md mx-auto">
-          <div className="col-span-2 text-xs font-semibold text-black uppercase tracking-wide">
-            Quartas
-          </div>
+          <div className="col-span-2 text-xs font-semibold text-black uppercase tracking-wide">Quartas</div>
 
           <div className="flex justify-start">
             <MatchCard
               ref={qTopLRef}
               value={quartasLeft[0]}
-              onChange={(v) =>
-                setQuartasLeft((arr) =>
-                  arr.map((x) => (x.id === quartasLeft[0].id ? v : x))
-                )
-              }
+              onChange={(v) => setQuartasLeft((arr) => arr.map((x) => (x.id === quartasLeft[0].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor(quartasLeft[0])}
             />
@@ -596,79 +535,51 @@ export default function TabelaCompeticao2() {
             <MatchCard
               ref={qTopRRef}
               value={quartasRight[0]}
-              onChange={(v) =>
-                setQuartasRight((arr) =>
-                  arr.map((x) => (x.id === quartasRight[0].id ? v : x))
-                )
-              }
+              onChange={(v) => setQuartasRight((arr) => arr.map((x) => (x.id === quartasRight[0].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor(quartasRight[0])}
             />
           </div>
 
-          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">
-            Semi-Final
-          </div>
+          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">Semi-Final</div>
           <div className="col-span-2 flex justify-center">
             <MatchCard
               ref={sTopRef}
               value={semiTopValue}
-              onChange={(v) =>
-                setSemiLeft((arr) =>
-                  arr.map((x) => (x.id === semiLeft[0].id ? v : x))
-                )
-              }
+              onChange={(v) => setSemiLeft((arr) => arr.map((x) => (x.id === semiLeft[0].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor({ ...semiTopValue })}
             />
           </div>
 
-          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">
-            Final
-          </div>
+          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">Final</div>
           <div className="col-span-2 flex justify-center">
             <MatchCard
               ref={finalRefV}
               value={finale[0]}
-              onChange={(v) =>
-                setFinale((arr) =>
-                  arr.map((x) => (x.id === finale[0].id ? v : x))
-                )
-              }
+              onChange={(v) => setFinale((arr) => arr.map((x) => (x.id === finale[0].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor(finale[0])}
             />
           </div>
 
-          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">
-            Semi-Final
-          </div>
+          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">Semi-Final</div>
           <div className="col-span-2 flex justify-center">
             <MatchCard
               ref={sBotRef}
               value={semiBotValue}
-              onChange={(v) =>
-                setSemiRight((arr) =>
-                  arr.map((x) => (x.id === semiRight[0].id ? v : x))
-                )
-              }
+              onChange={(v) => setSemiRight((arr) => arr.map((x) => (x.id === semiRight[0].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor({ ...semiBotValue })}
             />
           </div>
 
-          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">
-            Quartas
-          </div>
+          <div className="col-span-2 mt-2 text-xs font-semibold text-black uppercase tracking-wide">Quartas</div>
           <div className="flex justify-start">
             <MatchCard
               ref={qBotLRef}
               value={quartasLeft[1]}
-              onChange={(v) =>
-                setQuartasLeft((arr) =>
-                  arr.map((x) => (x.id === quartasLeft[1].id ? v : x))
-                )
-              }
+              onChange={(v) => setQuartasLeft((arr) => arr.map((x) => (x.id === quartasLeft[1].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor(quartasLeft[1])}
             />
@@ -677,87 +588,53 @@ export default function TabelaCompeticao2() {
             <MatchCard
               ref={qBotRRef}
               value={quartasRight[1]}
-              onChange={(v) =>
-                setQuartasRight((arr) =>
-                  arr.map((x) => (x.id === quartasRight[1].id ? v : x))
-                )
-              }
+              onChange={(v) => setQuartasRight((arr) => arr.map((x) => (x.id === quartasRight[1].id ? v : x)))}
               disabled={!isEdit}
               onOpenPens={() => openPensFor(quartasRight[1])}
             />
           </div>
         </div>
 
-        {/* Conexões do funil com “T” em cima e embaixo */}
+        {/* SVG – conexões do funil; “T” explícito no último ramal */}
         <svg
           key={vtick}
           className="pointer-events-none absolute inset-0"
           width={vContainerRef.current?.scrollWidth ?? 420}
           height={vContainerRef.current?.scrollHeight ?? 1400}
         >
-          {/* TOP: Quartas → Semi (T) */}
-          {(() => {
-            const semiTop = getTopCenter(sTopRef);
-            const qTL = getBottomCenter(qTopLRef);
-            const qTR = getBottomCenter(qTopRRef);
-            if (!semiTop || !qTL || !qTR) return null;
-
-            const T_BAR = 28;
-            const T_OFFSET = 24;
-
-            const yJ = semiTop.y - T_OFFSET;
-            const up = `M ${semiTop.x},${semiTop.y} V ${yJ}`;
-            const tee = `M ${semiTop.x - T_BAR},${yJ} H ${semiTop.x + T_BAR}`;
-            const left = `M ${semiTop.x - T_BAR},${yJ} H ${qTL.x} V ${qTL.y}`;
-            const right = `M ${semiTop.x + T_BAR},${yJ} H ${qTR.x} V ${qTR.y}`;
-
-            return (
-              <>
-                <path d={up} stroke="#111827" strokeWidth="4" fill="none" />
-                <path d={tee} stroke="#111827" strokeWidth="4" fill="none" />
-                <path d={left} stroke="#111827" strokeWidth="4" fill="none" />
-                <path d={right} stroke="#111827" strokeWidth="4" fill="none" />
-              </>
-            );
-          })()}
+          {/* Quartas topo → Semi topo */}
+          <path d={makeVPath(getBottomCenter(qTopLRef), getTopCenter(sTopRef))} stroke="#111827" strokeWidth="4" fill="none" />
+          <path d={makeVPath(getBottomCenter(qTopRRef), getTopCenter(sTopRef))} stroke="#111827" strokeWidth="4" fill="none" />
 
           {/* Semi topo → Final */}
-          <path
-            d={makeVPath(getBottomCenter(sTopRef), getTopCenter(finalRefV))}
-            stroke="#111827"
-            strokeWidth="4"
-            fill="none"
-          />
+          <path d={makeVPath(getBottomCenter(sTopRef),  getTopCenter(finalRefV))} stroke="#111827" strokeWidth="4" fill="none" />
 
           {/* Final → Semi baixo */}
-          <path
-            d={makeVPath(getBottomCenter(finalRefV), getTopCenter(sBotRef))}
-            stroke="#111827"
-            strokeWidth="4"
-            fill="none"
-          />
+          <path d={makeVPath(getBottomCenter(finalRefV), getTopCenter(sBotRef))} stroke="#111827" strokeWidth="4" fill="none" />
 
-          {/* BOTTOM: Semi → Quartas (T) */}
+          {/* Semi baixo → Quartas baixo (T explícito) */}
           {(() => {
-            const semiBot = getBottomCenter(sBotRef);
-            const qBL = getTopCenter(qBotLRef);
-            const qBR = getTopCenter(qBotRRef);
-            if (!semiBot || !qBL || !qBR) return null;
+            const p1 = getBottomCenter(sBotRef);
+            const tL = getTopCenter(qBotLRef);
+            const tR = getTopCenter(qBotRRef);
+            if (!p1 || !tL || !tR) return null;
 
-            const T_BAR = 28;
-            const T_OFFSET = 24;
+            const yJ  = p1.y + 24;  // altura onde fica o T
+            const bar = 0;         // meia-largura da barra do T
 
-            const yJ = semiBot.y + T_OFFSET;
-            const down = `M ${semiBot.x},${semiBot.y} V ${yJ}`;
-            const tee = `M ${semiBot.x - T_BAR},${yJ} H ${semiBot.x + T_BAR}`;
-            const left = `M ${semiBot.x - T_BAR},${yJ} H ${qBL.x} V ${qBL.y}`;
-            const right = `M ${semiBot.x + T_BAR},${yJ} H ${qBR.x} V ${qBR.y}`;
+            // desce da semi até o Y do T
+            const down  = `M ${p1.x},${p1.y} V ${yJ}`;
+            // barra horizontal do T
+            const tee   = `M ${p1.x - bar},${yJ} H ${p1.x + bar}`;
+            // cotovelos para as quartas
+            const left  = `M ${p1.x - bar},${yJ} H ${tL.x} V ${tL.y}`;
+            const right = `M ${p1.x + bar},${yJ} H ${tR.x} V ${tR.y}`;
 
             return (
               <>
-                <path d={down} stroke="#111827" strokeWidth="4" fill="none" />
-                <path d={tee} stroke="#111827" strokeWidth="4" fill="none" />
-                <path d={left} stroke="#111827" strokeWidth="4" fill="none" />
+                <path d={down}  stroke="#111827" strokeWidth="4" fill="none" />
+                <path d={tee}   stroke="#111827" strokeWidth="4" fill="none" />
+                <path d={left}  stroke="#111827" strokeWidth="4" fill="none" />
                 <path d={right} stroke="#111827" strokeWidth="4" fill="none" />
               </>
             );
@@ -770,7 +647,7 @@ export default function TabelaCompeticao2() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-black">Competição 2 • Tabela</h1>
+        <h1 className="text-2xl font-bold text-black">Competição 1 • Tabela</h1>
 
         {!isEdit ? (
           <button
@@ -802,10 +679,7 @@ export default function TabelaCompeticao2() {
       {tab === "grupos" && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {["A", "B", "C", "D"].map((g) => (
-            <div
-              key={g}
-              className="bg-purple-700 rounded-xl p-4 shadow-lg text-white"
-            >
+            <div key={g} className="bg-purple-700 rounded-xl p-4 shadow-lg text-white">
               <h2 className="text-xl font-semibold mb-3">Grupo {g}</h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
@@ -961,9 +835,7 @@ export default function TabelaCompeticao2() {
                         ref={finalRef}
                         value={m}
                         onChange={(v) =>
-                          setFinale((arr) =>
-                            arr.map((x) => (x.id === m.id ? v : x))
-                          )
+                          setFinale((arr) => arr.map((x) => (x.id === m.id ? v : x)))
                         }
                         disabled={!isEdit}
                         onOpenPens={() => openPensFor(m)}
@@ -1023,39 +895,27 @@ export default function TabelaCompeticao2() {
                 >
                   <path
                     d={makePath(getCenterRight(qlRefs[0]), getCenterLeft(slRef))}
-                    stroke="#111827"
-                    strokeWidth="4"
-                    fill="none"
+                    stroke="#111827" strokeWidth="4" fill="none"
                   />
                   <path
                     d={makePath(getCenterRight(qlRefs[1]), getCenterLeft(slRef))}
-                    stroke="#111827"
-                    strokeWidth="4"
-                    fill="none"
+                    stroke="#111827" strokeWidth="4" fill="none"
                   />
                   <path
                     d={makePath(getCenterRight(slRef), getCenterLeft(finalRef))}
-                    stroke="#111827"
-                    strokeWidth="4"
-                    fill="none"
+                    stroke="#111827" strokeWidth="4" fill="none"
                   />
                   <path
                     d={makePath(getCenterRight(finalRef), getCenterLeft(srRef))}
-                    stroke="#111827"
-                    strokeWidth="4"
-                    fill="none"
+                    stroke="#111827" strokeWidth="4" fill="none"
                   />
                   <path
                     d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[0]))}
-                    stroke="#111827"
-                    strokeWidth="4"
-                    fill="none"
+                    stroke="#111827" strokeWidth="4" fill="none"
                   />
                   <path
                     d={makePath(getCenterRight(srRef), getCenterLeft(qrRefs[1]))}
-                    stroke="#111827"
-                    strokeWidth="4"
-                    fill="none"
+                    stroke="#111827" strokeWidth="4" fill="none"
                   />
                 </svg>
               </div>
@@ -1113,8 +973,7 @@ export default function TabelaCompeticao2() {
                   const sB = pensSum(m.pB);
                   const filled = allFilled(m.pA) && allFilled(m.pB);
                   if (!filled) return "Marque todas as cobranças desta série.";
-                  if (m.pA.length < 5)
-                    return "São necessárias pelo menos 5 cobranças.";
+                  if (m.pA.length < 5) return "São necessárias pelo menos 5 cobranças.";
                   if (sA === sB)
                     return (
                       <>

@@ -153,8 +153,6 @@ export default function Sidebar() {
                 <div className="ml-4 mt-2 flex flex-col gap-2">
                   {[
                     { id: 1, name: "Competição 1" },
-                    { id: 2, name: "Competição 2" },
-                    { id: 3, name: "Competição 3" },
                   ].map((comp) => (
                     <div key={comp.id}>
                       <div
@@ -167,16 +165,16 @@ export default function Sidebar() {
 
                       {openCompetitions[comp.id] && (
                         <div className="ml-4 flex flex-col gap-2 mt-1">
-                          <NavLink to={`/copa-pab/competicao${comp.id}/tabela`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
+                          <NavLink to={`/copa-pab/competicao1/tabela`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
                             <ClipboardIcon /> Tabela
                           </NavLink>
-                          <NavLink to={`/copa-pab/competicao${comp.id}/times`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
+                          <NavLink to={`/copa-pab/competicao1/times`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
                             <SoccerBallIcon /> Times
                           </NavLink>
-                          <NavLink to={`/copa-pab/competicao${comp.id}/estatisticas`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
+                          <NavLink to={`/copa-pab/competicao1/estatisticas`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
                             <ChartIcon /> Estatísticas
                           </NavLink>
-                          <NavLink to={`/copa-pab/competicao${comp.id}/fotos`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
+                          <NavLink to={`/copa-pab/competicao1/fotos`} className="flex items-center gap-2 p-2 rounded-md hover:bg-purple-700 transition-colors">
                             <CameraIcon /> Fotos
                           </NavLink>
                         </div>
