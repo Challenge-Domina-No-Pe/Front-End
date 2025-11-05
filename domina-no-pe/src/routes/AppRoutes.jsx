@@ -11,7 +11,7 @@ import CriarConta from "../pages/CriarConta"
 import Noticias from "../pages/Noticias"
 import Peneiras from "../pages/Peneiras"
 import Escolinhas from "../pages/Escolinhas"
-import SobreNos from "../pages/SobreNos"
+import SobreNos from "../pages/Sobrenos"
 import Contato from "../pages/Contato"
 
 import CopaPabHome from "../pages/CopaPAB/CopaPabHome"
