@@ -1,7 +1,6 @@
 
 # Passa a Bola ⚽
 
-![Status](https://img.shields.io/badge/status-em--desenvolvimento-yellow)
 ![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4.1-cyan?logo=tailwindcss)
 
@@ -16,7 +15,6 @@ A aplicação permite que usuários se cadastrem, façam login e acessem uma ár
 -   🔐 **Autenticação de Usuários:** Sistema completo de login e cadastro utilizando **Firebase Authentication (E-mail e Senha)**.
 -   👤 **Perfis de Usuário:** Armazenamento de dados adicionais do usuário (nome, telefone, etc.) no **Cloud Firestore**, vinculados de forma segura ao perfil de autenticação.
 -   🛡️ **Rotas Protegidas:** Acesso a páginas exclusivas, como o dashboard de jogos, somente para usuários autenticados.
--   📊 **Integração com API Externa:** Consumo de dados da **API-Football** para exibir resultados de jogos de temporadas finalizadas, com tratamento de estado de carregamento e erros.
 -   🎨 **Design Moderno e Responsivo:** Interface estilizada com **Tailwind CSS**, apresentando os resultados das partidas em formato de *cards* visuais e informativos, incluindo logos dos times e do campeonato.
 -   ⚙️ **Arquitetura Escalável:** Código organizado com uma clara separação de responsabilidades, utilizando Context API para gerenciamento de estado global e uma camada de serviço para as chamadas de API.
 
@@ -28,7 +26,6 @@ Este projeto foi construído com as seguintes tecnologias:
 -   **Vite:** Ferramenta de build extremamente rápida para o ambiente de desenvolvimento.
 -   **React Router DOM:** Para gerenciamento de rotas e navegação.
 -   **Tailwind CSS:** Framework CSS para estilização rápida e moderna.
--   **Fetch API:** Para realizar as chamadas à API externa de futebol.
 
 ## 🚀 Como Rodar o Projeto Localmente
 
