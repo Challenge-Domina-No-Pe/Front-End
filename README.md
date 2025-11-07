@@ -18,6 +18,30 @@ A aplicação permite que usuários se cadastrem, façam login e acessem uma ár
 -   🎨 **Design Moderno e Responsivo:** Interface estilizada com **Tailwind CSS**, apresentando os resultados das partidas em formato de *cards* visuais e informativos, incluindo logos dos times e do campeonato.
 -   ⚙️ **Arquitetura Escalável:** Código organizado com uma clara separação de responsabilidades, utilizando Context API para gerenciamento de estado global e uma camada de serviço para as chamadas de API.
 
+
+## 📋 Instruções de Edição (Admin)
+
+Para gerenciar o conteúdo da **Copa PAB** (como adicionar jogadoras e ver estatísticas dinâmicas), é necessário acessar o painel administrativo.
+
+### Acesso ao Painel
+
+* **Usuário:** `Admin`
+* **Senha:** `Admin12#`
+
+### Adicionando uma Jogadora com Atributos
+
+1.  Após fazer login como Admin, navegue até a seção **"Copa PAB"**.
+2.  Acesse a área **"Times"**.
+3.  Clique no card roxo correspondente ao time que deseja editar (o card exibe o nome e as estatísticas do time).
+4.  Uma janela modal será aberta. Clique no botão **"adicionar jogadora"**.
+5.  Um novo card aparecerá para ser preenchido. Insira as informações e atributos da jogadora.
+6.  Após preencher, feche a janela.
+7.  Para visualizar o resultado, vá até a opção **"Estatísticas"** no painel.
+8.  Clique sobre o nome da jogadora que você acabou de criar.
+9.  O **Dashboard dinâmico** será exibido, refletindo os atributos cadastrados.
+10. Essa jogadora e estatísticas ficam salvas e você pode ver se entrar em outra conta, sem ser a admin.
+
+
 ## 🛠️ Tecnologias Utilizadas
 
 Este projeto foi construído com as seguintes tecnologias:
